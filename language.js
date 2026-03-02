@@ -1,6 +1,3 @@
-// =======================================================
-// GLOBAL TRANSLATIONS
-// =======================================================
 window.translations = {
     English: {
         settingsTitle: "z.WebKeyBind Settings",
@@ -182,12 +179,10 @@ window.translations = {
 
 window.currentLang = "English";
 
-// --- UPDATE LANGUAGE UI ---
 window.updateLanguageUI = function (lang) {
     window.currentLang = lang;
     const t = window.translations[lang] || window.translations['English'];
 
-    // Header & Titles
     document.getElementById('current-lang').innerText = lang;
     document.querySelector('.logo').innerText = t.settingsTitle;
     const titles = document.querySelectorAll('.section-title');
@@ -196,7 +191,6 @@ window.updateLanguageUI = function (lang) {
         titles[1].innerText = t.savedTitle;
     }
 
-    // Menu Buttons
     const btnImport = document.getElementById('btn-import');
     const btnExportSite = document.getElementById('btn-export-site');
     const btnExportAll = document.getElementById('btn-export-all');
@@ -204,7 +198,6 @@ window.updateLanguageUI = function (lang) {
     if (btnExportSite) btnExportSite.innerText = t.exportBtn;
     if (btnExportAll) btnExportAll.innerText = t.exportAllBtn;
 
-    // Modal
     const modalTitle = document.querySelector('.modal-content h3');
     const dropMainText = document.querySelector('#drop-zone p:not(.sub-text)');
     const dropSubText = document.querySelector('.sub-text');
@@ -215,7 +208,6 @@ window.updateLanguageUI = function (lang) {
     if (dropSubText) dropSubText.innerText = t.browseText;
     if (closeBtn) closeBtn.innerText = t.cancelBtn;
 
-    // Main Buttons
     const btnAdd = document.querySelector('.btn-add');
     const btnDeleteAll = document.querySelector('.btn-delete-all');
     if (btnAdd) btnAdd.innerHTML = `<span class="plus">+</span> ${t.addBtn}`;
@@ -224,7 +216,6 @@ window.updateLanguageUI = function (lang) {
     const burger = document.getElementById('burger-label');
     if (burger) burger.setAttribute('aria-label', t.menuLabel);
 
-    // Dropdown Items
     document.querySelectorAll('.dropdown-item').forEach(item => {
         if (item.getAttribute('data-lang') === lang) {
             item.classList.add('active');
@@ -235,7 +226,6 @@ window.updateLanguageUI = function (lang) {
         }
     });
 
-    // Default Table
     const rows = document.querySelectorAll('.default-table tbody tr');
     if (rows.length >= 4) {
         rows[0].cells[0].innerText = t.def_row1;
@@ -244,28 +234,20 @@ window.updateLanguageUI = function (lang) {
         rows[3].cells[0].innerText = t.def_row4;
     }
 
-    // HTML Lang Attribute
     const langMap = { "English": "en", "हिंदी": "hi", "मराठी": "mr", "മലയാളം": "ml" };
     document.documentElement.lang = langMap[lang] || "en";
 };
 
-// --- DROPDOWN TOGGLE LOGIC ---
 document.addEventListener('DOMContentLoaded', () => {
     const langTrigger = document.querySelector('.dropdown-trigger');
     const langMenu = document.getElementById('lang-menu');
 
     if (langTrigger && langMenu) {
-        // 1. CLICK TRIGGER
         langTrigger.addEventListener('click', (e) => {
             e.stopPropagation();
-
-            // --- FIX: MUTUAL EXCLUSION (Close other menu) ---
             const otherMenu = document.querySelector('.import-export-dropdown');
             if (otherMenu) otherMenu.style.display = 'none';
-            // -----------------------------------------------
-
             const isVisible = langMenu.style.display === 'block';
-
             if (isVisible) {
                 langMenu.style.display = 'none';
                 langTrigger.setAttribute('aria-expanded', 'false');
@@ -274,8 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 langTrigger.setAttribute('aria-expanded', 'true');
             }
         });
-
-        // 2. ITEM SELECTION
         document.querySelectorAll('.dropdown-item').forEach(item => {
             item.setAttribute('tabindex', '0');
             const handleSelect = (e) => {
@@ -288,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 langTrigger.setAttribute('aria-expanded', 'false');
                 e.stopPropagation();
             };
-
             item.addEventListener('click', handleSelect);
             item.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -297,14 +276,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-
-        // 3. GLOBAL CLOSE
         document.addEventListener('click', () => {
             langMenu.style.display = 'none';
             langTrigger.setAttribute('aria-expanded', 'false');
         });
-
-        // 4. ESCAPE KEY CLOSE
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && langMenu.style.display === 'block') {
                 langMenu.style.display = 'none';

@@ -1,10 +1,8 @@
-// =======================================================
 // VALIDATION & HELPER UTILITIES
-// =======================================================
 function isValidURL(string) {
     if (!string) return false;
     try {
-        new URL(string); 
+        new URL(string);
         return true;
     } catch (_) {
         try {
@@ -20,9 +18,7 @@ function normalizeUrl(url) {
     return url.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0].toLowerCase();
 }
 
-// =======================================================
 // INITIALIZATION & MAIN LOGIC
-// =======================================================
 document.addEventListener('DOMContentLoaded', () => {
     window.currentLang = "English";
 
@@ -41,10 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const alertDiv = document.createElement('div');
         alertDiv.id = 'webkeybind-popup-alert';
-        alertDiv.setAttribute('aria-hidden', 'true'); 
+        alertDiv.setAttribute('aria-hidden', 'true');
         alertDiv.innerText = msg;
 
-        let bgColor = "#007BFF"; 
+        let bgColor = "#007BFF";
         if (type === "error") bgColor = "#DC3545";
         if (type === "success") bgColor = "#28A745";
 
@@ -76,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showAccessibleConfirm(msg, onConfirmCallback) {
         const t = window.translations?.[window.currentLang] || window.translations?.['English'] || {};
-        
+
         popupAnnouncer.textContent = '';
         setTimeout(() => { popupAnnouncer.textContent = msg + " Press Tab to select options."; }, 50);
 
@@ -104,14 +100,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = document.createElement('p');
         text.innerText = msg;
         text.style.cssText = "margin: 0 0 20px 0; color: #333; font-size: 15px; line-height: 1.5; font-weight: 500;";
-        
+
         const btnContainer = document.createElement('div');
         btnContainer.style.cssText = "display: flex; justify-content: center; gap: 12px;";
 
         const btnCancel = document.createElement('button');
         btnCancel.innerText = t.cancel || "Cancel";
         btnCancel.style.cssText = "padding: 8px 16px; border: 1px solid #ccc; background: #f8f9fa; border-radius: 4px; cursor: pointer; color: #333; font-weight: bold; flex: 1;";
-        
+
         const btnYes = document.createElement('button');
         btnYes.innerText = t.yes_delete || "Yes, Delete";
         btnYes.style.cssText = "padding: 8px 16px; border: none; background: #DC3545; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 1;";
@@ -128,20 +124,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         overlay.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {
-                if (e.shiftKey) { 
+                if (e.shiftKey) {
                     if (document.activeElement === btnCancel) {
                         e.preventDefault();
                         btnYes.focus();
                     }
-                } else { 
+                } else {
                     if (document.activeElement === btnYes) {
                         e.preventDefault();
                         btnCancel.focus();
                     }
                 }
-            } else if (e.key === 'Escape') { 
+            } else if (e.key === 'Escape') {
                 e.preventDefault();
-                overlay.remove(); 
+                overlay.remove();
             }
         });
         btnCancel.focus();
@@ -162,10 +158,10 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.get(['ui_language'], (result) => {
         if (result.ui_language) window.currentLang = result.ui_language;
         if (result.ui_language && window.updateLanguageUI) window.updateLanguageUI(result.ui_language);
-        
+
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs[0] && tabs[0].url) {
-                try { window.currentSiteHostname = new URL(tabs[0].url).hostname; } 
+                try { window.currentSiteHostname = new URL(tabs[0].url).hostname; }
                 catch (e) { window.currentSiteHostname = "local"; }
             }
             loadShortcuts();
@@ -255,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         data[field] = value;
                         validateAndSave(data);
                     });
-                } else if (field !== 'elementId') { 
+                } else if (field !== 'elementId') {
                     data[field] = value;
                     validateAndSave(data);
                 }
@@ -279,11 +275,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     chrome.scripting.executeScript({
                         target: { tabId: tabs[0].id },
                         func: (selector) => {
-                            try { if (document.querySelector(selector)) return true; } catch(e) {}
+                            try { if (document.querySelector(selector)) return true; } catch (e) { }
                             if (document.getElementById(selector)) return true;
-                            try { if (document.querySelector(`[aria-label="${selector.replace(/"/g, '\\"')}"]`)) return true; } catch(e) {}
-                            try { if (document.querySelector(`[data-testid="${selector.replace(/"/g, '\\"')}"]`)) return true; } catch(e) {}
-                            return false; 
+                            try { if (document.querySelector(`[aria-label="${selector.replace(/"/g, '\\"')}"]`)) return true; } catch (e) { }
+                            try { if (document.querySelector(`[data-testid="${selector.replace(/"/g, '\\"')}"]`)) return true; } catch (e) { }
+                            return false;
                         },
                         args: [val]
                     }, (results) => {
@@ -296,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         } else {
                             e.target.classList.remove('input-error');
                             data.elementId = val;
-                            validateAndSave(data); 
+                            validateAndSave(data);
                         }
                     });
                 });

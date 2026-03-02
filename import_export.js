@@ -1,67 +1,52 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- UI REFERENCES ---
     const btnExportSite = document.getElementById('btn-export-site');
     const btnExportAll = document.getElementById('btn-export-all');
     const btnImport = document.getElementById('btn-import');
-    
-    // Menu Elements
-    const menuContainer = document.querySelector('.menu-container'); 
+
+    const menuContainer = document.querySelector('.menu-container');
     const menuBurger = document.querySelector('.menu-burger');
     const menuDropdown = document.querySelector('.import-export-dropdown');
     const closeMenuBtn = document.querySelector('.close-menu');
 
-    // Modal Elements
     const importModal = document.getElementById('import-modal');
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const btnCloseImport = document.getElementById('btn-close-import');
 
-    // --- 1. FOCUS TRAP LOGIC (New Feature) ---
     function handleFocusTrap(e) {
         if (e.key !== 'Tab') return;
-
-        // Find all focusable elements inside the modal
         const focusableElements = importModal.querySelectorAll(
             'a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])'
         );
-        
-        if (focusableElements.length === 0) return;
 
+        if (focusableElements.length === 0) return;
         const firstElement = focusableElements[0];
         const lastElement = focusableElements[focusableElements.length - 1];
 
-        // Shift + Tab (Backward)
-        if (e.shiftKey) { 
+        if (e.shiftKey) {
             if (document.activeElement === firstElement) {
                 e.preventDefault();
-                lastElement.focus(); // Loop to bottom
+                lastElement.focus();
             }
-        } 
-        // Tab (Forward)
-        else { 
+        } else {
             if (document.activeElement === lastElement) {
                 e.preventDefault();
-                firstElement.focus(); // Loop to top
+                firstElement.focus();
             }
         }
     }
 
-    // --- 2. MENU TOGGLE ---
     if (menuBurger && menuDropdown) {
         menuBurger.addEventListener('click', (e) => {
             e.stopPropagation();
-            
-            // Close Language Menu (Mutual Exclusion)
             const langMenu = document.getElementById('lang-menu');
             const langBtn = document.getElementById('lang-button');
-            if(langMenu) langMenu.style.display = 'none';
-            if(langBtn) langBtn.setAttribute('aria-expanded', 'false');
+            if (langMenu) langMenu.style.display = 'none';
+            if (langBtn) langBtn.setAttribute('aria-expanded', 'false');
 
             const isVisible = menuDropdown.style.display === 'block';
             menuDropdown.style.display = isVisible ? 'none' : 'block';
         });
-
-        // Auto-close on Tab Out
         if (menuContainer) {
             menuContainer.addEventListener('focusout', (event) => {
                 if (!menuContainer.contains(event.relatedTarget)) {
@@ -70,21 +55,19 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-    
+
     if (closeMenuBtn) {
         closeMenuBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             menuDropdown.style.display = 'none';
         });
     }
-    
-    document.addEventListener('click', () => { 
-        if(menuDropdown) menuDropdown.style.display = 'none'; 
+    document.addEventListener('click', () => {
+        if (menuDropdown) menuDropdown.style.display = 'none';
     });
 
-    // --- 3. EXPORT LOGIC ---
     function exportShortcuts(exportAll) {
-        const hostname = window.currentSiteHostname || ""; 
+        const hostname = window.currentSiteHostname || "";
         chrome.storage.local.get(null, (items) => {
             let allItems = Object.values(items).filter(item => item.id);
             let data = exportAll ? allItems : allItems.filter(item => item.url === hostname);
@@ -110,15 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnExportSite) btnExportSite.addEventListener('click', () => exportShortcuts(false));
     if (btnExportAll) btnExportAll.addEventListener('click', () => exportShortcuts(true));
 
-    // --- 4. IMPORT LOGIC (Updated with Trap) ---
     function openModal() {
         importModal.style.display = 'flex';
         if (menuDropdown) menuDropdown.style.display = 'none';
-        
-        // Activate Focus Trap
         document.addEventListener('keydown', handleFocusTrap);
-        
-        // Initial Focus
         const silentStart = document.getElementById('silent-start');
         if (silentStart) {
             setTimeout(() => { silentStart.focus(); }, 50);
@@ -128,22 +106,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeModal() {
         if (!importModal) return;
         importModal.style.display = 'none';
-        
-        // Deactivate Focus Trap
         document.removeEventListener('keydown', handleFocusTrap);
-        
-        // Return Focus to Trigger
-        if (btnImport) btnImport.focus(); 
+        if (btnImport) btnImport.focus();
     }
 
     if (btnImport) btnImport.addEventListener('click', openModal);
     if (btnCloseImport) btnCloseImport.addEventListener('click', closeModal);
-    
+
     if (importModal) {
         importModal.addEventListener('click', (e) => {
             if (e.target === importModal) closeModal();
         });
-        // Special handler for Escape (distinct from the Trap)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && importModal.style.display === 'flex') {
                 closeModal();
@@ -151,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. DRAG & DROP HANDLING ---
     if (dropZone) {
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('keydown', (e) => {
@@ -179,11 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (fileInput) {
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length) processFile(e.target.files[0]);
-            fileInput.value = ''; 
+            fileInput.value = '';
         });
     }
 
-    // --- 6. FILE PROCESSOR ---
     function processFile(file) {
         const t = window.translations[window.currentLang] || window.translations['English'];
         if (!file.name.endsWith('.json')) {
