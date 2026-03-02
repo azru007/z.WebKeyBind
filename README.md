@@ -57,12 +57,14 @@ Instead of tabbing through dozens of elements, users can simply press a predefin
 
 ### 2. Creating a Shortcut
 
-#### 🖱 Mouse Mode (`Alt + Shift + M`)
+### creation mode (Alt+Shift+C) to activate and deactivate
+
+#### 🖱 Mouse
 1. Hover over the button you want to automate.
 2. Click the button to **lock** it (highlight turns **orange**).
 3. Press any key (e.g., **B** for *Buy*) to save the shortcut.
 
-#### ⌨ Keyboard Mode (`Alt + Shift + K`)
+#### ⌨ Keyboard 
 1. Use the **Tab** key to navigate to the desired element.
 2. Press a key to save the shortcut.
 
