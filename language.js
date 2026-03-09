@@ -1,3 +1,6 @@
+// =======================================================
+// GLOBAL TRANSLATIONS
+// =======================================================
 window.translations = {
     English: {
         settingsTitle: "z.WebKeyBind Settings",
@@ -37,11 +40,7 @@ window.translations = {
         key_already_used: "Key '{key}' is already used for '{name}'.",
         invalid_id: "The Button ID / Selector was not found on this webpage. Please check the ID or Aria-Label.",
         cancel: "Cancel",
-        yes_delete: "Yes, Delete",
-        invalid_id: "The Button ID / Selector was not found on this webpage. Please check the ID or Aria-Label.",
-        deleted_success: "Shortcut deleted successfully.",
-        deleted_all_success: "All shortcuts deleted successfully.",
-        deleted_site_success: "Shortcuts for this site deleted."
+        yes_delete: "Yes, Delete"
     },
     हिंदी: {
         settingsTitle: "z.WebKeyBind सेटिंग्स",
@@ -81,11 +80,7 @@ window.translations = {
         key_already_used: "कुंजी '{key}' का उपयोग पहले से ही '{name}' के लिए किया जा रहा है।",
         invalid_id: "इस वेबपेज पर बटन ID या सिलेक्टर नहीं मिला। कृपया ID या Aria-Label की जाँच करें।",
         cancel: "रद्द करें",
-        yes_delete: "हाँ, हटाएँ",
-        invalid_id: "इस वेबपेज पर बटन ID या सिलेक्टर नहीं मिला। कृपया ID या Aria-Label की जाँच करें।",
-        deleted_success: "शॉर्टकट सफलतापूर्वक हटा दिया गया।",
-        deleted_all_success: "सभी शॉर्टकट सफलतापूर्वक हटा दिए गए।",
-        deleted_site_success: "इस साइट के शॉर्टकट हटा दिए गए।"
+        yes_delete: "हाँ, हटाएँ"
     },
     मराठी: {
         settingsTitle: "z.WebKeyBind सेटिंग्स",
@@ -125,11 +120,7 @@ window.translations = {
         key_already_used: "कळ '{key}' आधीच '{name}' साठी वापरली आहे।",
         invalid_id: "या वेबपेजवर बटण ID किंवा सिलेक्टर सापडला नाही. कृपया ID किंवा Aria-Label तपासा.",
         cancel: "रद्द करा",
-        yes_delete: "होय, हटवा",
-        invalid_id: "या वेबपेजवर बटण ID किंवा सिलेक्टर सापडला नाही. कृपया ID किंवा Aria-Label तपासा.",
-        deleted_success: "शॉर्टकट यशस्वीरित्या हटवला.",
-        deleted_all_success: "सर्व शॉर्टकट यशस्वीरित्या हटवले.",
-        deleted_site_success: "या साइटचे शॉर्टकट हटवले गेले."
+        yes_delete: "होय, हटवा"
     },
     മലയാളം: {
         settingsTitle: "z.WebKeyBind ക്രമീകരണങ്ങൾ",
@@ -169,11 +160,7 @@ window.translations = {
         key_already_used: "കീ '{key}' ഇതിനകം '{name}' എന്നതിനായി ഉപയോഗിക്കുന്നു.",
         invalid_id: "ഈ വെബ്‌പേജിൽ ബട്ടൺ ID അല്ലെങ്കിൽ സെലക്ടർ കണ്ടെത്തിയില്ല. ദയവായി ID അല്ലെങ്കിൽ Aria-Label പരിശോധിക്കുക.",
         cancel: "റദ്ദാക്കുക",
-        yes_delete: "അതെ, നീക്കം ചെയ്യുക",
-        invalid_id: "ഈ വെബ്‌പേജിൽ ബട്ടൺ ID അല്ലെങ്കിൽ സെലക്ടർ കണ്ടെത്തിയില്ല. ദയവായി ID അല്ലെങ്കിൽ Aria-Label പരിശോധിക്കുക.",
-        deleted_success: "കുറുക്കുവഴി വിജയകരമായി നീക്കംചെയ്തു.",
-        deleted_all_success: "എല്ലാ കുറുക്കുവഴികളും വിജയകരമായി നീക്കംചെയ്തു.",
-        deleted_site_success: "ഈ സൈറ്റിലെ കുറുക്കുവഴികൾ നീക്കംചെയ്തു."
+        yes_delete: "അതെ, നീക്കം ചെയ്യുക"
     }
 };
 
@@ -241,21 +228,26 @@ window.updateLanguageUI = function (lang) {
 document.addEventListener('DOMContentLoaded', () => {
     const langTrigger = document.querySelector('.dropdown-trigger');
     const langMenu = document.getElementById('lang-menu');
+    const langContainer = document.querySelector('.language-dropdown'); // Grab the wrapper div
 
     if (langTrigger && langMenu) {
         langTrigger.addEventListener('click', (e) => {
             e.stopPropagation();
             const otherMenu = document.querySelector('.import-export-dropdown');
             if (otherMenu) otherMenu.style.display = 'none';
+            
             const isVisible = langMenu.style.display === 'block';
             if (isVisible) {
                 langMenu.style.display = 'none';
                 langTrigger.setAttribute('aria-expanded', 'false');
+                if(window.showAccessibleAlert) window.showAccessibleAlert("Language menu closed.", "info");
             } else {
                 langMenu.style.display = 'block';
                 langTrigger.setAttribute('aria-expanded', 'true');
+                if(window.showAccessibleAlert) window.showAccessibleAlert("Language menu opened. Use Tab to select.", "info");
             }
         });
+        
         document.querySelectorAll('.dropdown-item').forEach(item => {
             item.setAttribute('tabindex', '0');
             const handleSelect = (e) => {
@@ -267,6 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 langMenu.style.display = 'none';
                 langTrigger.setAttribute('aria-expanded', 'false');
                 e.stopPropagation();
+                langTrigger.focus(); // Return focus to the button after selection
+                
+                if(window.showAccessibleAlert) window.showAccessibleAlert(`Language changed to ${selectedLang}`, "success");
             };
             item.addEventListener('click', handleSelect);
             item.addEventListener('keydown', (e) => {
@@ -276,15 +271,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
+
+        // Close when tabbing out of the container
+        if (langContainer) {
+            langContainer.addEventListener('focusout', (event) => {
+                if (!langContainer.contains(event.relatedTarget) && langMenu.style.display === 'block') {
+                    langMenu.style.display = 'none';
+                    langTrigger.setAttribute('aria-expanded', 'false');
+                    if(window.showAccessibleAlert) window.showAccessibleAlert("Language menu closed.", "info");
+                }
+            });
+        }
+
         document.addEventListener('click', () => {
-            langMenu.style.display = 'none';
-            langTrigger.setAttribute('aria-expanded', 'false');
+            if (langMenu.style.display === 'block') {
+                langMenu.style.display = 'none';
+                langTrigger.setAttribute('aria-expanded', 'false');
+            }
         });
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && langMenu.style.display === 'block') {
                 langMenu.style.display = 'none';
                 langTrigger.setAttribute('aria-expanded', 'false');
-                langTrigger.focus();
+                langTrigger.focus(); // Return focus on escape
+                if(window.showAccessibleAlert) window.showAccessibleAlert("Language menu closed.", "info");
             }
         });
     }

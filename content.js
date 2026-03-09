@@ -1,12 +1,16 @@
+// =======================================================
 // 1. STATE & VARIABLES
-let currentMode = null;
-let activeHoverElement = null;
-let lastInteractionType = 'mouse';
-let isSaving = false;
+// =======================================================
+let currentMode = null; 
+let activeHoverElement = null; 
+let lastInteractionType = 'mouse'; 
+let isSaving = false; 
 let isLocked = false;
-let shortcutCache = [];
+let shortcutCache = []; 
 
+// =======================================================
 // 2. ACCESSIBILITY ENGINE
+// =======================================================
 const srAnnouncer = document.createElement('div');
 srAnnouncer.id = "webkeybind-announcer";
 srAnnouncer.setAttribute('aria-live', 'assertive');
@@ -25,7 +29,7 @@ function announceToScreenReader(message, color = "default") {
 }
 
 function showNotification(msg, colorType) {
-    if (colorType === "modal") return;
+    if (colorType === "modal") return; 
 
     const existing = document.getElementById('webkeybind-notification');
     if (existing) existing.remove();
@@ -33,14 +37,15 @@ function showNotification(msg, colorType) {
     const div = document.createElement('div');
     div.id = 'webkeybind-notification';
     div.innerText = msg;
-    div.setAttribute('aria-hidden', 'true');
-
-    let bgColor = "#333333";
-    if (colorType === "blue") bgColor = "#007BFF";
-    if (colorType === "purple") bgColor = "#6f42c1";
-    if (colorType === "orange") bgColor = "#FF9800";
-    if (colorType === "red") bgColor = "#DC3545";
-    if (colorType === "green") bgColor = "#28A745";
+    div.setAttribute('aria-hidden', 'true'); 
+    
+    let bgColor = "#333333"; 
+    if (colorType === "blue") bgColor = "#007BFF";   
+    if (colorType === "purple") bgColor = "#6f42c1"; 
+    if (colorType === "orange") bgColor = "#FF9800"; 
+    if (colorType === "red")  bgColor = "#DC3545";   
+    if (colorType === "green") bgColor = "#28A745";  
+    if (colorType === "info") bgColor = "#17a2b8"; 
 
     div.style.cssText = `
         position: fixed !important; top: 20px !important; left: 50% !important; 
@@ -50,93 +55,43 @@ function showNotification(msg, colorType) {
         font-weight: bold !important; font-size: 16px !important;
         box-shadow: 0 4px 12px rgba(0,0,0,0.4) !important; transition: opacity 0.3s ease-in-out !important; pointer-events: none;
     `;
-
+    
     document.body.appendChild(div);
-    setTimeout(() => {
-        if (div && div.parentNode) {
-            div.style.opacity = "0";
-            setTimeout(() => { if (div.parentNode) div.remove(); }, 300);
-        }
+    setTimeout(() => { 
+        if(div && div.parentNode) { 
+            div.style.opacity = "0"; 
+            setTimeout(() => { if(div.parentNode) div.remove(); }, 300); 
+        } 
     }, 4000);
 }
 
-// 3. UI INJECTION (Robust)
-function toggleSettingsModal() {
-    if (!chrome.runtime?.id) {
-        announceToScreenReader("Extension context invalid. Refresh page.", "red");
-        return;
-    }
-
-    const existing = document.getElementById('webkeybind-shadow-root');
-    if (existing) {
-        existing.remove();
-        announceToScreenReader("Settings window is closed", "red");
-        currentMode = null;
-        updateHighlight(null);
-        return;
-    }
-
-    try {
-        const host = document.createElement('div');
-        host.id = 'webkeybind-shadow-root';
-        host.style.cssText = 'position: fixed; z-index: 2147483647; top: 0; left: 0; width: 0; height: 0;';
-        document.body.appendChild(host);
-
-        const shadow = host.attachShadow({ mode: 'open' });
-
-        const backdrop = document.createElement('div');
-        backdrop.style.cssText = `
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.5); z-index: 2147483646;
-            backdrop-filter: blur(2px);
-        `;
-        backdrop.onclick = () => {
-            host.remove();
-            announceToScreenReader("Settings window is closed", "red");
-        };
-
-        const iframe = document.createElement('iframe');
-        iframe.src = chrome.runtime.getURL("index.html");
-        iframe.style.cssText = `
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 900px; height: 650px; max-width: 95vw; max-height: 95vh;
-            border: none; border-radius: 12px; 
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            z-index: 2147483647; background: white;
-        `;
-
-        shadow.appendChild(backdrop);
-        shadow.appendChild(iframe);
-
-        announceToScreenReader("Settings window is opened", "blue");
-
-    } catch (err) {
-        announceToScreenReader("Error opening settings. Refresh page.", "red");
-    }
-}
-
-// 4. CACHE SYSTEM
+// =======================================================
+// 3. CACHE SYSTEM
+// =======================================================
 function updateShortcutCache() {
     if (!chrome?.storage?.local) return;
     try {
         const currentHost = window.location.hostname;
         chrome.storage.local.get(null, (items) => {
             if (chrome.runtime.lastError) return;
-            shortcutCache = Object.values(items).filter(s =>
+            shortcutCache = Object.values(items).filter(s => 
                 s.key && (currentHost.includes(s.url) || s.url === "<URL>")
             );
         });
-    } catch (e) { }
+    } catch(e) {}
 }
+
 updateShortcutCache();
 
 try {
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local') updateShortcutCache();
     });
-} catch (e) { }
+} catch(e) {}
 
-// 5. LISTENERS
+// =======================================================
+// 4. LISTENERS
+// =======================================================
 function isInputActive() {
     const el = document.activeElement;
     if (!el) return false;
@@ -147,62 +102,17 @@ function isInputActive() {
 
 document.addEventListener('mouseover', (e) => {
     if (isLocked) return;
-    if (currentMode !== 'mouse' && currentMode !== 'creation') return;
+    if (currentMode !== 'mouse' && currentMode !== 'creation') return; 
     lastInteractionType = 'mouse';
     const target = getClickableTarget(e.target);
-    if (target !== activeHoverElement) updateHighlight(target);
+    if (target !== activeHoverElement) updateHighlight(target); 
 }, true);
 
 document.addEventListener('focus', (e) => {
-    if (currentMode !== 'keyboard' && currentMode !== 'creation') return;
+    if (currentMode !== 'keyboard' && currentMode !== 'creation') return; 
     lastInteractionType = 'keyboard';
     const target = getClickableTarget(e.target);
-    if (target) updateHighlight(target);
-}, true);
-
-window.addEventListener('keydown', (event) => {
-    if (event.repeat) return;
-    const key = event.key.toUpperCase();
-    if (['CONTROL', 'SHIFT', 'ALT', 'TAB', 'CAPSLOCK'].includes(key)) return;
-
-    if (event.altKey && event.shiftKey) {
-        if (key === 'S') {
-            event.preventDefault(); event.stopImmediatePropagation();
-            toggleSettingsModal();
-            return;
-        }
-        if (key === 'M') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('mouse'); return; }
-        if (key === 'K') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('keyboard'); return; }
-        if (key === 'C') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('creation'); return; }
-        if (key === 'A') { event.preventDefault(); event.stopImmediatePropagation(); readAllShortcuts(); return; }
-    }
-
-    if (isInputActive() && !event.altKey && !event.ctrlKey) return;
-
-    if (currentMode !== null) {
-        if (key.match(/^[A-Z0-9]$/)) {
-            if (isInputActive()) return;
-
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            if (isSaving) return;
-
-            if (activeHoverElement) {
-                saveShortcut(activeHoverElement, key);
-            } else {
-                announceToScreenReader("No element selected.", "red");
-            }
-        }
-    } else {
-        if (event.altKey || (event.ctrlKey && event.shiftKey)) {
-            const match = shortcutCache.find(s => s.key === key);
-            if (match) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                runCachedShortcut(match);
-            }
-        }
-    }
+    if (target) updateHighlight(target); 
 }, true);
 
 document.addEventListener('click', (e) => {
@@ -213,15 +123,62 @@ document.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
 
-        isLocked = true;
+        isLocked = true; 
         updateHighlight(target);
-
-        target.style.outline = "4px solid #FF9800";
+        
+        target.style.outline = "4px solid #FF9800"; 
         announceToScreenReader("Button selected. Press a key to save shortcut.", "orange");
     }
 }, true);
 
-// 6. HIGHLIGHT ENGINE
+// --- MASTER KEY LISTENER ---
+window.addEventListener('keydown', (event) => {
+    if (event.repeat) return; 
+    const key = event.key.toUpperCase();
+    if (['CONTROL', 'SHIFT', 'ALT', 'TAB', 'CAPSLOCK'].includes(key)) return;
+
+    if (event.altKey && event.shiftKey) {
+        // NOTE: 'S' is completely removed from here. 
+        // Chrome will now handle Alt+Shift+S natively via manifest.json
+        if (key === 'M') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('mouse'); return; }
+        if (key === 'K') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('keyboard'); return; }
+        if (key === 'C') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('creation'); return; }
+        if (key === 'A') { event.preventDefault(); event.stopImmediatePropagation(); readAllShortcuts();return; }
+    }
+
+    if (isInputActive() && !event.altKey && !event.ctrlKey) return; 
+
+    // SAVE LOGIC
+    if (currentMode !== null) {
+        if (key.match(/^[A-Z0-9]$/)) {
+            if (isInputActive()) return;
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (isSaving) return; 
+
+            if (activeHoverElement) {
+                saveShortcut(activeHoverElement, key);
+            } else {
+                announceToScreenReader("No element selected.", "red");
+            }
+        }
+    } else {
+        // EXECUTE SHORTCUT
+        if (event.altKey || (event.ctrlKey && event.shiftKey)) { 
+            const match = shortcutCache.find(s => s.key === key);
+            if (match) {
+                event.preventDefault(); 
+                event.stopImmediatePropagation();
+                runCachedShortcut(match);
+            }
+        }
+    }
+}, true);
+
+// =======================================================
+// 5. HIGHLIGHT ENGINE
+// =======================================================
 function updateHighlight(newElement) {
     document.querySelectorAll('[data-webkeybind-highlight="true"]').forEach(el => {
         removeHighlight(el);
@@ -237,7 +194,7 @@ function addHighlight(el) {
     if (el.dataset.originalOutline === undefined) {
         el.dataset.originalOutline = el.style.outline || "";
     }
-    el.style.outline = "4px solid #2196F3";
+    el.style.outline = "4px solid #2196F3"; 
     el.style.outlineOffset = "2px";
     el.setAttribute('data-webkeybind-highlight', 'true');
 }
@@ -252,11 +209,13 @@ function removeHighlight(el) {
     el.removeAttribute('data-webkeybind-highlight');
 }
 
-// 7. MODE SWITCHING
+// =======================================================
+// 6. MODE SWITCHING
+// =======================================================
 function switchMode(newMode) {
     if (!chrome.runtime?.id) { announceToScreenReader("Please refresh the page.", "red"); return; }
     isLocked = false;
-
+    
     if (currentMode === newMode) {
         let modeName = "Teach Mode";
         if (currentMode === 'mouse') modeName = "Mouse Mode";
@@ -265,15 +224,15 @@ function switchMode(newMode) {
 
         currentMode = null;
         document.body.removeAttribute('role');
-        updateHighlight(null);
-
-        announceToScreenReader(`${modeName} Disabled.`, "red");
+        updateHighlight(null); 
+        
+        announceToScreenReader(`${modeName} Disabled.`, "red"); 
         document.body.style.cursor = "default";
         return;
     }
 
     currentMode = newMode;
-    document.body.setAttribute('role', 'application');
+    document.body.setAttribute('role', 'application'); 
 
     if (newMode === 'mouse') lastInteractionType = 'mouse';
     if (newMode === 'keyboard') lastInteractionType = 'keyboard';
@@ -281,10 +240,10 @@ function switchMode(newMode) {
     if (newMode === 'mouse' && activeHoverElement) updateHighlight(activeHoverElement);
     if (newMode === 'keyboard') {
         const focused = getClickableTarget(document.activeElement);
-        updateHighlight(focused);
+        updateHighlight(focused); 
     }
 
-    if (newMode === 'mouse') { announceToScreenReader("Mouse Mode Enabled.", "blue"); document.body.style.cursor = "crosshair"; }
+    if (newMode === 'mouse') { announceToScreenReader("Mouse Mode Enabled.", "blue"); document.body.style.cursor = "crosshair"; } 
     else if (newMode === 'keyboard') { announceToScreenReader("Keyboard Mode Enabled.", "purple"); document.body.style.cursor = "default"; }
     else if (newMode === 'creation') { announceToScreenReader("Creation Mode Enabled.", "orange"); document.body.style.cursor = "crosshair"; }
 }
@@ -295,16 +254,17 @@ function getClickableTarget(el) {
     return el.closest('button, a, input, select, textarea, [role="button"], [role="link"], [role="menuitem"], [role="checkbox"], [tabindex]:not([tabindex="-1"]), [class*="btn"], [data-testid], [aria-label]');
 }
 
-// 8. SAVE LOGIC
+// =======================================================
+// 7. SAVE LOGIC
+// =======================================================
 function saveShortcut(element, key) {
     if (!chrome?.storage?.local) return;
     const currentHost = window.location.hostname;
     const profile = generateRobustProfile(element);
-
+    
     const currentName = (profile.aria || profile.text || "Element").trim();
     const currentId = profile.id || "";
     const currentPath = profile.path || "";
-    const currentHref = profile.href || "";
 
     chrome.storage.local.get(null, (items) => {
         const userLang = items.ui_language || "English";
@@ -312,8 +272,10 @@ function saveShortcut(element, key) {
             key_already_used: "Key '{key}' is already used for '{name}'."
         };
         const allItems = Object.values(items);
-        const keyConflict = allItems.find(item =>
-            item.key === key &&
+
+        // --- 1. CHECK: IS THIS KEY ALREADY USED ANYWHERE ON THIS SITE? ---
+        const keyConflict = allItems.find(item => 
+            item.key === key && 
             (item.url === currentHost || item.url === "<URL>")
         );
 
@@ -325,15 +287,16 @@ function saveShortcut(element, key) {
                 const existingName = keyConflict.name || "another button";
                 const msg = t.key_already_used.replace("{key}", key).replace("{name}", existingName);
                 announceToScreenReader(msg, "red");
-                element.style.outline = "4px solid #DC3545";
-                setTimeout(() => { if (currentMode) addHighlight(element); }, 1500);
+                element.style.outline = "4px solid #DC3545"; 
+                setTimeout(() => { if(currentMode) addHighlight(element); }, 1500);
                 return;
             }
         }
 
+        // --- 2. SAVE NEW SHORTCUT ---
         isSaving = true;
         if (keyConflict) {
-            chrome.storage.local.remove(`shortcut_${keyConflict.id}`);
+             chrome.storage.local.remove(`shortcut_${keyConflict.id}`);
         }
         const uniqueId = Date.now().toString();
         const simpleId = profile.id ? `#${profile.id}` : (profile.text || profile.path);
@@ -345,26 +308,33 @@ function saveShortcut(element, key) {
             announceToScreenReader(`Saved shortcut Alt ${key}`, "green");
             element.style.outline = "4px solid #00E676";
             setTimeout(() => {
-                if (currentMode) addHighlight(element);
+                if(currentMode) addHighlight(element); 
                 else removeHighlight(element);
             }, 1000);
         });
     });
 }
 
-// 9. EXECUTION LOGIC
+// =======================================================
+// 8. EXECUTION LOGIC
+// =======================================================
 function runCachedShortcut(match) {
     let result = { element: null, healed: false };
-
+    
     if (match.profile) result = findElementWithHealing(match.profile);
     else result.element = findElementBySelector(match.elementId);
-
+    
     if (result.element) {
-        if (result.element.offsetParent === null) {
+        if(result.element.offsetParent === null) {
             announceToScreenReader("Element is hidden.", "red");
             return;
         }
+
+        // --- NEW: ANNOUNCE SUCCESSFUL EXECUTION ---
+        announceToScreenReader(`Executing: ${match.name || "Shortcut"}`, "blue");
+
         executeShortcut(result.element);
+        
         if (result.healed) {
             match.profile = generateRobustProfile(result.element);
             match.elementId = match.profile.id ? `#${match.profile.id}` : (match.profile.text || match.profile.path);
@@ -378,8 +348,9 @@ function runCachedShortcut(match) {
 function executeShortcut(element) {
     if (!element) return;
     element.focus();
-    element.click();
+    element.click(); 
 }
+
 function findElementWithHealing(profile) {
     if (!profile) return { element: null, healed: false };
     if (profile.id && document.getElementById(profile.id)) {
@@ -388,27 +359,28 @@ function findElementWithHealing(profile) {
     if (profile.href) {
         try {
             const link = document.querySelector(`a[href="${profile.href.replace(/"/g, '\\"')}"]`);
-            if (link) return { element: link, healed: true };
-        } catch (e) { }
+            if (link) return { element: link, healed: true }; 
+        } catch(e) {}
     }
-    if (profile.testId) {
-        const e = document.querySelector(`[data-testid="${profile.testId}"]`);
-        if (e) return { element: e, healed: true };
+    if (profile.testId) { 
+        const e = document.querySelector(`[data-testid="${profile.testId}"]`); 
+        if(e) return { element: e, healed: true }; 
     }
-    if (profile.path) {
-        try {
-            const e = document.querySelector(profile.path);
-            if (e) return { element: e, healed: true };
-        } catch (e) { }
+    if (profile.path) { 
+        try { 
+            const e = document.querySelector(profile.path); 
+            if(e) return { element: e, healed: true }; 
+        } catch(e){} 
     }
-    if (profile.aria) {
-        const e = document.querySelector(`[aria-label="${profile.aria.replace(/"/g, '\\"')}"]`);
-        if (e) return { element: e, healed: true };
+    if (profile.aria) { 
+        const e = document.querySelector(`[aria-label="${profile.aria.replace(/"/g, '\\"')}"]`); 
+        if(e) return { element: e, healed: true }; 
     }
 
     return { element: null, healed: false };
 }
 
+// HELPER UTILITIES
 function generateRobustProfile(element) {
     if (!element) return null;
     let safeId = null;
@@ -416,9 +388,10 @@ function generateRobustProfile(element) {
         const escapedId = CSS.escape(element.id);
         const count = document.querySelectorAll(`#${escapedId}`).length;
         if (count === 1) {
-            safeId = element.id;
+            safeId = element.id; 
         }
     }
+
     let href = element.getAttribute('href') || null;
     if (!href && element.closest('a')) {
         href = element.closest('a').getAttribute('href');
@@ -436,11 +409,12 @@ function generateRobustProfile(element) {
 }
 function findElementBySelector(selector) { try { return document.querySelector(selector); } catch { return null; } }
 
-function generateCssPath(el) {
-    if (!(el instanceof Element)) return;
-    const path = [];
-    while (el.nodeType === Node.ELEMENT_NODE) {
-        let selector = el.nodeName.toLowerCase();
+// CSS PATH GENERATOR
+function generateCssPath(el) { 
+    if (!(el instanceof Element)) return; 
+    const path = []; 
+    while (el.nodeType === Node.ELEMENT_NODE) { 
+        let selector = el.nodeName.toLowerCase(); 
 
         let isUnique = false;
         if (el.id) {
@@ -450,25 +424,27 @@ function generateCssPath(el) {
             }
         }
 
-        if (isUnique) {
-            selector += '#' + CSS.escape(el.id);
-            path.unshift(selector);
-            break;
-        } else {
-            let sib = el, nth = 1;
-            while (sib = sib.previousElementSibling) {
-                if (sib.nodeName.toLowerCase() === selector) nth++;
-            }
-            selector += `:nth-of-type(${nth})`;
-        }
+        if (isUnique) { 
+            selector += '#' + CSS.escape(el.id); 
+            path.unshift(selector); 
+            break; 
+        }else { 
+            let sib = el, nth = 1; 
+            while (sib = sib.previousElementSibling) { 
+                if (sib.nodeName.toLowerCase() === selector) nth++; 
+            } 
+            selector += `:nth-of-type(${nth})`; 
+        } 
 
-        path.unshift(selector);
-        el = el.parentNode;
-    }
-    return path.join(" > ");
+        path.unshift(selector); 
+        el = el.parentNode; 
+    } 
+    return path.join(" > "); 
 }
 
-// 10. AUDIO READER
+// =======================================================
+// 9. AUDIO READER
+// =======================================================
 function readAllShortcuts() {
     if (!chrome?.storage?.local) return;
     const currentHost = window.location.hostname;
