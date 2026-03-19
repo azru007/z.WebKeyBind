@@ -333,7 +333,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const saveAllBtn = document.createElement('button');
         saveAllBtn.id = 'btn-save-all';
-        saveAllBtn.innerText = "Save Changes";
+        const t = window.translations?.[window.currentLang] || window.translations?.['English'] || {};
+        saveAllBtn.innerText = t.saveChanges || "Save Changes";
         saveAllBtn.style.cssText = "padding: 8px 16px; border: none; background-color: #28a745; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: sans-serif; font-size: 13px;";
         
         // Wrap them up so the parent layout doesn't split them apart!

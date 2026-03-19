@@ -11,9 +11,8 @@ window.translations = {
         showCurrent: "Show Current Site Only",
         deleteAll: "Delete Shortcuts",
         def_row1: "Open or Close Settings Window",
-        def_row2: "Use Keyboard to Focus & Record",
-        def_row3: "Use Mouse to Hover & Record",
-        def_row4: "Read all Shortcuts",
+        def_row2: "Use Keyboard and Mouse to Hover & Record",
+        def_row3: "Read all Shortcuts",
         p_url: "Website URL",
         p_name: "Action Name",
         p_id: "Element ID / Class",
@@ -38,9 +37,16 @@ window.translations = {
         duplicate_error: "The key '{key}' is already saved for this button: {name}",
         button_already_has_shortcut: "This button already has a shortcut: Alt + {key}",
         key_already_used: "Key '{key}' is already used for '{name}'.",
-        invalid_id: "The Button ID / Selector was not found on this webpage. Please check the ID or Aria-Label.",
+        invalid_id: "The Button ID / Selector was not found on this webpage. Please check the ID.",
         cancel: "Cancel",
-        yes_delete: "Yes, Delete"
+        yes_delete: "Yes, Delete",
+        guideTitle: "Important Note:",
+        guideP1: "You must add a dot ( . ) before a Class name or a hash ( # ) before an ID name.",
+        guideP2: "If a class name contains spaces, replace every space with a dot.",
+        guideEx: "Example:",
+        headerAction: "Action",
+        headerShortcut: "Shortcut",
+        saveChanges: "Save Changes",
     },
     हिंदी: {
         settingsTitle: "z.WebKeyBind सेटिंग्स",
@@ -51,13 +57,12 @@ window.translations = {
         showCurrent: "केवल वर्तमान साइट",
         deleteAll: "शॉर्टकट हटाएं",
         def_row1: "सेटिंग्स विंडो खोलें या बंद करें",
-        def_row2: "रिकॉर्ड करने के लिए कीबोर्ड का उपयोग करें",
-        def_row3: "रिकॉर्ड करने के लिए माउस का उपयोग करें",
-        def_row4: "सभी शॉर्टकट पढ़ें",
+        def_row2: "होवर और रिकॉर्ड करने के लिए कीबोर्ड और माउस का उपयोग करें",
+        def_row3: "सभी शॉर्टकट पढ़ें",
         p_url: "वेबसाइट URL",
         p_name: "क्रिया का नाम",
-        p_id: "तत्व ID",
-        p_key: "कूंजी",
+        p_id: "तत्व ID / क्लास",
+        p_key: "कुंजी",
         no_shortcuts: "इसके लिए कोई शॉर्टकट नहीं मिला:",
         deleted_success: "शॉर्टकट सफलतापूर्वक हटा दिया गया।",
         deleted_all_success: "सभी शॉर्टकट सफलतापूर्वक हटा दिए गए।",
@@ -78,9 +83,16 @@ window.translations = {
         duplicate_error: "कुंजी '{key}' पहले से ही इस बटन के लिए सहेजी गई है: {name}",
         button_already_has_shortcut: "इस बटन का शॉर्टकट पहले से ही मौजूद है: Alt + {key}",
         key_already_used: "कुंजी '{key}' का उपयोग पहले से ही '{name}' के लिए किया जा रहा है।",
-        invalid_id: "इस वेबपेज पर बटन ID या सिलेक्टर नहीं मिला। कृपया ID या Aria-Label की जाँच करें।",
+        invalid_id: "इस वेबपेज पर बटन ID या सिलेक्टर नहीं मिला। कृपया ID की जाँच करें।",
         cancel: "रद्द करें",
-        yes_delete: "हाँ, हटाएँ"
+        yes_delete: "हाँ, हटाएँ",
+        guideTitle: "महत्वपूर्ण नोट:",
+        guideP1: "आपको किसी क्लास नाम से पहले डॉट ( . ) या आईडी नाम से पहले हैश ( # ) जोड़ना होगा।",
+        guideP2: "यदि क्लास नाम में स्पेस है, तो प्रत्येक स्पेस को डॉट से बदलें।",
+        guideEx: "उदाहरण:",
+        headerAction: "क्रिया",
+        headerShortcut: "शॉर्टकट",
+        saveChanges: "परिवर्तन सहेजें",
     },
     मराठी: {
         settingsTitle: "z.WebKeyBind सेटिंग्स",
@@ -91,12 +103,11 @@ window.translations = {
         showCurrent: "फक्त वर्तमान साइट",
         deleteAll: "शॉर्टकट हटवा",
         def_row1: "सेटिंग्ज विंडो उघडा किंवा बंद करा",
-        def_row2: "रेकॉर्ड करण्यासाठी कीबोर्ड वापरा",
-        def_row3: "रेकॉर्ड करण्यासाठी माऊस वापरा",
-        def_row4: "सर्व शॉर्टकट वाचा",
+        def_row2: "होव्हर आणि रेकॉर्ड करण्यासाठी कीबोर्ड आणि माउस वापरा",
+        def_row3: "सर्व शॉर्टकट वाचा",
         p_url: "संकेतस्थळ URL",
         p_name: "क्रियेचे नाव",
-        p_id: "एलिमेंट ID",
+        p_id: "एलिमेंट ID / क्लास",
         p_key: "कळ (Key)",
         no_shortcuts: "यासाठी शॉर्टकट सापडले नाहीत:",
         deleted_success: "शॉर्टकट यशस्वीरित्या हटवला.",
@@ -118,9 +129,16 @@ window.translations = {
         duplicate_error: "ही की '{key}' या बटणासाठी आधीच सेव्ह केली आहे: {name}",
         button_already_has_shortcut: "या बटणासाठी शॉर्टकट आधीच अस्तित्वात आहे: Alt + {key}",
         key_already_used: "कळ '{key}' आधीच '{name}' साठी वापरली आहे।",
-        invalid_id: "या वेबपेजवर बटण ID किंवा सिलेक्टर सापडला नाही. कृपया ID किंवा Aria-Label तपासा.",
+        invalid_id: "या वेबपेजवर बटण ID किंवा सिलेक्टर सापडला नाही. कृपया ID तपासा.",
         cancel: "रद्द करा",
-        yes_delete: "होय, हटवा"
+        yes_delete: "होय, हटवा",
+        guideTitle: "महत्त्वाची नोंद:",
+        guideP1: "तुम्हाला क्लास नावापूर्वी डॉट ( . ) किंवा आयडी नावापूर्वी हॅश ( # ) जोडणे आवश्यक आहे.",
+        guideP2: "जर क्लास नावात स्पेस असेल, तर प्रत्येक स्पेस डॉट ने बदला.",
+        guideEx: "उदाहरण:",
+        headerAction: "क्रिया",
+        headerShortcut: "शॉर्टकट",
+        saveChanges: "बदल करा",
     },
     മലയാളം: {
         settingsTitle: "z.WebKeyBind ക്രമീകരണങ്ങൾ",
@@ -130,13 +148,12 @@ window.translations = {
         showAll: "എല്ലാ കുറുക്കുവഴികളും",
         showCurrent: "ഈ സൈറ്റിൽ മാത്രം",
         deleteAll: "കുറുക്കുവഴികൾ നീക്കം ചെയ്യുക",
-        def_row1: "ക്രമീകരണ ജാലകം തുറക്കുക/അടയ്ക്കുക",
-        def_row2: "റെക്കോർഡ് ചെയ്യാൻ കീബോർഡ് ഉപയോഗിക്കുക",
-        def_row3: "റെക്കോർഡ് ചെയ്യാൻ മൗസ് ഉപയോഗിക്കുക",
-        def_row4: "എല്ലാ കുറുക്കുവഴികളും വായിക്കുക",
+        def_row1: "ക്രമീകരണ ജാലകം തുറക്കുക അല്ലെങ്കിൽ അടയ്ക്കുക",
+        def_row2: "ഹോവർ ചെയ്യാനും റെക്കോർഡ് ചെയ്യാനും കീബോർഡും മൗസും ഉപയോഗിക്കുക",
+        def_row3: "എല്ലാ കുറുക്കുവഴികളും വായിക്കുക",
         p_url: "വെബ്സൈറ്റ് URL",
         p_name: "പ്രവർത്തനത്തിന്റെ പേര്",
-        p_id: "എലമെന്റ് ID",
+        p_id: "എലമെന്റ് ID / ക്ലാസ്സ്",
         p_key: "കീ",
         no_shortcuts: "കുറുക്കുവഴികളൊന്നും കണ്ടെത്തിയില്ല:",
         deleted_success: "കുറുക്കുവഴി വിജയകരമായി നീക്കംചെയ്തു.",
@@ -158,9 +175,16 @@ window.translations = {
         duplicate_error: "ഈ കീ '{key}' ഈ ബട്ടണിനായി ഇതിനകം സേവ് ചെയ്തിട്ടുണ്ട്: {name}",
         button_already_has_shortcut: "ഈ ബട്ടണിന് ഇതിനകം ഒരു കുറുക്കുവഴി ഉണ്ട്: Alt + {key}",
         key_already_used: "കീ '{key}' ഇതിനകം '{name}' എന്നതിനായി ഉപയോഗിക്കുന്നു.",
-        invalid_id: "ഈ വെബ്‌പേജിൽ ബട്ടൺ ID അല്ലെങ്കിൽ സെലക്ടർ കണ്ടെത്തിയില്ല. ദയവായി ID അല്ലെങ്കിൽ Aria-Label പരിശോധിക്കുക.",
+        invalid_id: "ഈ വെബ്‌പേജിൽ ബട്ടൺ ID അല്ലെങ്കിൽ സെലക്ടർ കണ്ടെത്തിയില്ല. ദയവായി ID പരിശോധിക്കുക.",
         cancel: "റദ്ദാക്കുക",
-        yes_delete: "അതെ, നീക്കം ചെയ്യുക"
+        yes_delete: "അതെ, നീക്കം ചെയ്യുക",
+        guideTitle: "പ്രധാന കുറിപ്പ്:",
+        guideP1: "നിങ്ങൾ ഒരു ക്ലാസ്സ് പേരിന് മുമ്പ് ഒരു കുത്ത് ( . ) അല്ലെങ്കിൽ ഐഡി പേരിന് മുമ്പ് ഒരു ഹാഷ് ( # ) ചേർക്കണം.",
+        guideP2: "ക്ലാസ്സ് പേരിൽ സ്പേസുകൾ ഉണ്ടെങ്കിൽ, ഓരോ സ്പേസും ഒരു കുത്ത് ഉപയോഗിച്ച് മാറ്റുക.",
+        guideEx: "ഉദാഹരണം:",
+        headerAction: "പ്രവർത്തനം",
+        headerShortcut: "കുറുക്കുവഴി",
+        saveChanges: "മാറ്റങ്ങൾ സംരക്ഷിക്കുക",
     }
 };
 
@@ -170,6 +194,11 @@ window.updateLanguageUI = function (lang) {
     window.currentLang = lang;
     const t = window.translations[lang] || window.translations['English'];
 
+    const saveAllBtn = document.getElementById('btn-save-all');
+    if (saveAllBtn) {
+        saveAllBtn.innerText = t.saveChanges;
+    }
+    
     document.getElementById('current-lang').innerText = lang;
     document.querySelector('.logo').innerText = t.settingsTitle;
     const titles = document.querySelectorAll('.section-title');
@@ -214,12 +243,27 @@ window.updateLanguageUI = function (lang) {
     });
 
     const rows = document.querySelectorAll('.default-table tbody tr');
-    if (rows.length >= 4) {
-        rows[0].cells[0].innerText = t.def_row1;
-        rows[1].cells[0].innerText = t.def_row2;
-        rows[2].cells[0].innerText = t.def_row3;
-        rows[3].cells[0].innerText = t.def_row4;
+    if (rows.length > 0) {
+        if (rows[0]) rows[0].cells[0].innerText = t.def_row1;
+        if (rows[1]) rows[1].cells[0].innerText = t.def_row2;
+        if (rows[2]) rows[2].cells[0].innerText = t.def_row3;
     }
+
+    const headerAction = document.getElementById('headerAction');
+    const headerShortcut = document.getElementById('headerShortcut');
+
+    if (headerAction) headerAction.innerText = t.headerAction;
+    if (headerShortcut) headerShortcut.innerText = t.headerShortcut;
+    // --- UPDATED GUIDE BOX ---
+    const guideTitle = document.getElementById('guideTitle');
+    const guideP1 = document.getElementById('guideP1');
+    const guideP2 = document.getElementById('guideP2');
+    const guideEx = document.getElementById('guideEx');
+
+    if (guideTitle) guideTitle.innerText = t.guideTitle;
+    if (guideP1) guideP1.innerText = t.guideP1;
+    if (guideP2) guideP2.innerText = t.guideP2;
+    if (guideEx) guideEx.innerText = t.guideEx;
 
     const langMap = { "English": "en", "हिंदी": "hi", "मराठी": "mr", "മലയാളം": "ml" };
     document.documentElement.lang = langMap[lang] || "en";
@@ -228,7 +272,7 @@ window.updateLanguageUI = function (lang) {
 document.addEventListener('DOMContentLoaded', () => {
     const langTrigger = document.querySelector('.dropdown-trigger');
     const langMenu = document.getElementById('lang-menu');
-    const langContainer = document.querySelector('.language-dropdown'); // Grab the wrapper div
+    const langContainer = document.querySelector('.language-dropdown');
 
     if (langTrigger && langMenu) {
         langTrigger.addEventListener('click', (e) => {
@@ -259,7 +303,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 langMenu.style.display = 'none';
                 langTrigger.setAttribute('aria-expanded', 'false');
                 e.stopPropagation();
-                langTrigger.focus(); // Return focus to the button after selection
+                langTrigger.focus();
                 
                 if(window.showAccessibleAlert) window.showAccessibleAlert(`Language changed to ${selectedLang}`, "success");
             };
@@ -272,7 +316,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Close when tabbing out of the container
         if (langContainer) {
             langContainer.addEventListener('focusout', (event) => {
                 if (!langContainer.contains(event.relatedTarget) && langMenu.style.display === 'block') {
@@ -294,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 'Escape' && langMenu.style.display === 'block') {
                 langMenu.style.display = 'none';
                 langTrigger.setAttribute('aria-expanded', 'false');
-                langTrigger.focus(); // Return focus on escape
+                langTrigger.focus();
                 if(window.showAccessibleAlert) window.showAccessibleAlert("Language menu closed.", "info");
             }
         });
