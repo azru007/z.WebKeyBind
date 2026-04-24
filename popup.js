@@ -462,7 +462,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveAllBtn = document.createElement('button');
         saveAllBtn.id = 'btn-save-all';
         const t = window.translations?.[window.currentLang] || window.translations?.['English'] || {};
+<<<<<<< HEAD
         saveAllBtn.textContent = t.saveChanges || "Save Changes"; 
+=======
+        saveAllBtn.innerText = t.saveChanges || "Save Changes";
+>>>>>>> 78a51532cc467128132baa6cb6ee274eaa65af98
         saveAllBtn.style.cssText = "padding: 8px 16px; border: none; background-color: #28a745; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: sans-serif; font-size: 13px;";
         
         deleteAllBtn.parentNode.insertBefore(btnWrapper, deleteAllBtn);
