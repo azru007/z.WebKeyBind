@@ -63,8 +63,8 @@
     "commands": {
         "_execute_action": {
             "suggested_key": {
-                "default": "Alt+Shift+W",
-                "mac": "Alt+Shift+W"
+                "default": "Alt+Shift+Z",
+                "mac": "Alt+Shift+Z"
             },
             "description": "Open WebKeyBind Settings"
         }

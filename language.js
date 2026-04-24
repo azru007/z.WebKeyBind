@@ -756,19 +756,11 @@ window.updateLanguageUI = function (lang) {
 
     const saveAllBtn = document.getElementById('btn-save-all');
     if (saveAllBtn) {
-<<<<<<< HEAD
         saveAllBtn.textContent = t.saveChanges; // FIX: innerText -> textContent
     }
     
     document.getElementById('current-lang').textContent = lang; // FIX: innerText -> textContent
     document.querySelector('.logo').textContent = t.settingsTitle; // FIX: innerText -> textContent
-=======
-        saveAllBtn.innerText = t.saveChanges;
-    }
-    
-    document.getElementById('current-lang').innerText = lang;
-    document.querySelector('.logo').innerText = t.settingsTitle;
->>>>>>> 78a51532cc467128132baa6cb6ee274eaa65af98
     const titles = document.querySelectorAll('.section-title');
     if (titles.length >= 2) {
         titles[0].textContent = t.defaultTitle; // FIX: innerText -> textContent
@@ -837,45 +829,27 @@ window.updateLanguageUI = function (lang) {
 
     const rows = document.querySelectorAll('.default-table tbody tr');
     if (rows.length > 0) {
-<<<<<<< HEAD
         if (rows[0]) rows[0].cells[0].textContent = t.def_row1; // FIX: innerText -> textContent
         if (rows[1]) rows[1].cells[0].textContent = t.def_row2; // FIX: innerText -> textContent
         if (rows[2]) rows[2].cells[0].textContent = t.def_row3; // FIX: innerText -> textContent
-=======
-        if (rows[0]) rows[0].cells[0].innerText = t.def_row1;
-        if (rows[1]) rows[1].cells[0].innerText = t.def_row2;
-        if (rows[2]) rows[2].cells[0].innerText = t.def_row3;
->>>>>>> 78a51532cc467128132baa6cb6ee274eaa65af98
     }
 
     const headerAction = document.getElementById('headerAction');
     const headerShortcut = document.getElementById('headerShortcut');
 
-<<<<<<< HEAD
     if (headerAction) headerAction.textContent = t.headerAction; // FIX: innerText -> textContent
     if (headerShortcut) headerShortcut.textContent = t.headerShortcut; // FIX: innerText -> textContent
     
-=======
-    if (headerAction) headerAction.innerText = t.headerAction;
-    if (headerShortcut) headerShortcut.innerText = t.headerShortcut;
->>>>>>> 78a51532cc467128132baa6cb6ee274eaa65af98
     // --- UPDATED GUIDE BOX ---
     const guideTitle = document.getElementById('guideTitle');
     const guideP1 = document.getElementById('guideP1');
     const guideP2 = document.getElementById('guideP2');
     const guideEx = document.getElementById('guideEx');
 
-<<<<<<< HEAD
     if (guideTitle) guideTitle.textContent = t.guideTitle; // FIX: innerText -> textContent
     if (guideP1) guideP1.textContent = t.guideP1; // FIX: innerText -> textContent
     if (guideP2) guideP2.textContent = t.guideP2; // FIX: innerText -> textContent
     if (guideEx) guideEx.textContent = t.guideEx; // FIX: innerText -> textContent
-=======
-    if (guideTitle) guideTitle.innerText = t.guideTitle;
-    if (guideP1) guideP1.innerText = t.guideP1;
-    if (guideP2) guideP2.innerText = t.guideP2;
-    if (guideEx) guideEx.innerText = t.guideEx;
->>>>>>> 78a51532cc467128132baa6cb6ee274eaa65af98
 
     const langMap = { "English": "en", "हिंदी": "hi", "मराठी": "mr", "മലയാളം": "ml" };
     document.documentElement.lang = langMap[lang] || "en";
