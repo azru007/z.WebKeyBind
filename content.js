@@ -5,7 +5,6 @@ let currentMode = null;
 let activeHoverElement = null; 
 let lastInteractionType = 'mouse'; 
 let isSaving = false; 
-let isLocked = false;
 let shortcutCache = []; 
 
 // =======================================================
@@ -41,7 +40,6 @@ function announceToScreenReader(message, color = "default") {
     srAnnouncer1.setAttribute('lang', isoCode);
     srAnnouncer2.setAttribute('lang', isoCode);
 
-    // === INSTANT ANNOUNCEMENT - NO SETTIMEOUT DELAY ===
     if (announcerToggle) {
         srAnnouncer2.textContent = ''; 
         srAnnouncer1.textContent = message; 
@@ -125,34 +123,30 @@ function isInputActive() {
 }
 
 document.addEventListener('mouseover', (e) => {
-    if (isLocked) return;
-    if (currentMode !== 'mouse' && currentMode !== 'creation') return; 
+    if (currentMode !== 'creation') return; 
     lastInteractionType = 'mouse';
     const target = getClickableTarget(e.target);
-    if (target !== activeHoverElement) updateHighlight(target); 
+    if (target !== activeHoverElement) {
+        updateHighlight(target); 
+        target.focus(); // Pull focus so SR recognizes the target
+    }
 }, true);
 
 document.addEventListener('focus', (e) => {
-    if (currentMode !== 'keyboard' && currentMode !== 'creation') return; 
+    if (currentMode !== 'creation') return; 
     lastInteractionType = 'keyboard';
     const target = getClickableTarget(e.target);
     if (target) updateHighlight(target); 
 }, true);
 
 document.addEventListener('click', (e) => {
-    if (currentMode !== 'mouse' && currentMode !== 'creation') return;
-
-    const target = getClickableTarget(e.target);
-    if (target) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-
-        isLocked = true; 
-        updateHighlight(target);
-        
-        target.style.outline = "4px solid #FF9800"; 
-        
-        announceToScreenReader("Element locked. Press a letter or number key to assign the shortcut, or Escape to cancel.", "orange");
+    // Prevent accidental clicks on links when in creation mode
+    if (currentMode === 'creation') {
+        const target = getClickableTarget(e.target);
+        if (target) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        }
     }
 }, true);
 
@@ -173,11 +167,6 @@ window.addEventListener('keydown', (event) => {
     if (['CONTROL', 'SHIFT', 'ALT', 'TAB', 'CAPSLOCK'].includes(key)) return;
 
     if (event.altKey && event.shiftKey) {
-        // === FIX: Mouse and Keyboard modes safely disabled ===
-        // if (key === 'M') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('mouse'); return; }
-        // if (key === 'K') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('keyboard'); return; }
-        
-        // === FIX: Alerts and Voice completely removed from Alt+Shift+A ===
         if (key === 'A') { 
             event.preventDefault(); 
             event.stopImmediatePropagation(); 
@@ -194,8 +183,8 @@ window.addEventListener('keydown', (event) => {
 
     if (isInputActive() && !event.altKey && !event.ctrlKey) return; 
 
-    // SAVE LOGIC
-    if (currentMode !== null) {
+    // === SAVE LOGIC ===
+    if (currentMode === 'creation') {
         if (key.match(/^[A-Z0-9]$/)) {
             if (isInputActive()) return;
 
@@ -203,18 +192,15 @@ window.addEventListener('keydown', (event) => {
             event.stopImmediatePropagation();
             if (isSaving) return; 
 
-            if (activeHoverElement && isLocked) {
+            // Save the key instantly to whatever is highlighted
+            if (activeHoverElement) {
                 saveShortcut(activeHoverElement, key);
-            } else if (activeHoverElement && !isLocked) {
-                announceToScreenReader("Please press Enter to select this element first.", "red");
             } else {
                 announceToScreenReader("No element selected.", "red");
             }
-        } else if (isLocked) {
-            announceToScreenReader("Invalid key. Please press a letter or number.", "red");
         }
     } else {
-        // EXECUTE LOGIC
+        // === EXECUTE LOGIC ===
         if (event.altKey || (event.ctrlKey && event.shiftKey)) { 
             const match = shortcutCache.find(s => s.key === key);
             if (match) {
@@ -227,7 +213,7 @@ window.addEventListener('keydown', (event) => {
 }, true);
 
 // =======================================================
-// 5. HIGHLIGHT ENGINE
+// 5. HIGHLIGHT ENGINE & ACCESSIBILITY BYPASS
 // =======================================================
 function updateHighlight(newElement) {
     document.querySelectorAll('[data-webkeybind-highlight="true"]').forEach(el => {
@@ -247,6 +233,14 @@ function addHighlight(el) {
     el.style.outline = "4px solid #2196F3"; 
     el.style.outlineOffset = "2px";
     el.setAttribute('data-webkeybind-highlight', 'true');
+
+    // === FIX: Forces Screen Reader to pass keys through ONLY for this element ===
+    if (currentMode === 'creation') {
+        if (el.dataset.originalRole === undefined) {
+            el.dataset.originalRole = el.getAttribute('role') || "null";
+        }
+        el.setAttribute('role', 'application'); 
+    }
 }
 
 function removeHighlight(el) {
@@ -256,6 +250,17 @@ function removeHighlight(el) {
     } else {
         el.style.outline = "";
     }
+    
+    // Restore the element's original role so the site behaves normally again
+    if (el.dataset.originalRole !== undefined) {
+        if (el.dataset.originalRole === "null") {
+            el.removeAttribute('role');
+        } else {
+            el.setAttribute('role', el.dataset.originalRole);
+        }
+        delete el.dataset.originalRole;
+    }
+
     el.removeAttribute('data-webkeybind-highlight');
 }
 
@@ -264,19 +269,17 @@ function removeHighlight(el) {
 // =======================================================
 function switchMode(newMode) {
     if (!chrome.runtime?.id) { announceToScreenReader("Please refresh the page.", "red"); return; }
-    isLocked = false;
     
     if (currentMode === newMode) {
         currentMode = null;
         updateHighlight(null); 
         
-        announceToScreenReader("Creation Mode Canceled.", "red"); 
+        announceToScreenReader("Creation Mode Disabled", "red"); 
         document.body.style.cursor = "default";
         return;
     }
 
     currentMode = newMode;
-    // === DELAY BUG FIX: document.body.setAttribute('role', 'application') IS COMPLETELY GONE ===
 
     if (newMode === 'mouse' || newMode === 'creation') lastInteractionType = 'mouse';
     if (newMode === 'keyboard') lastInteractionType = 'keyboard';
@@ -284,7 +287,7 @@ function switchMode(newMode) {
     if (newMode === 'creation' && activeHoverElement) updateHighlight(activeHoverElement);
 
     if (newMode === 'creation') { 
-        announceToScreenReader("Creation Mode Enabled. Use Tab to find an element, press Enter to lock it, then press a key to save.", "orange"); 
+        announceToScreenReader("Creation Mode Enabled", "orange"); 
         document.body.style.cursor = "crosshair"; 
     }
 }
@@ -333,7 +336,6 @@ function saveShortcut(element, key) {
             const isSameButtonId = currentId !== "" && currentId === (keyConflict.profile?.id || "");
             const isSameButtonPath = currentPath === (keyConflict.profile?.path || "");
             if (!isSameButtonId && !isSameButtonPath) {
-                isLocked = false;
                 const existingName = keyConflict.name || "another element";
                 const msg = keyAlreadyUsedStr.replace("{key}", key).replace("{name}", existingName);
                 
@@ -353,13 +355,13 @@ function saveShortcut(element, key) {
 
         chrome.storage.local.set({ [`shortcut_${uniqueId}`]: data }, () => {
             isSaving = false;
-            isLocked = false;
-            announceToScreenReader(`Saved shortcut! Alt ${key} is now bound to ${currentName}`, "green");
+            announceToScreenReader(`Saved shortcut Alt ${key}`, "green");
             element.style.outline = "4px solid #00E676";
             
             setTimeout(() => {
                 if(currentMode) {
-                    switchMode(currentMode); 
+                    // STAYS ACTIVE! Restore blue highlight so user can bind the next key instantly
+                    addHighlight(element); 
                 } else {
                     removeHighlight(element);
                 }
