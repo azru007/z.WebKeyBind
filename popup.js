@@ -26,16 +26,60 @@ function normalizeUrl(url) {
 document.addEventListener('DOMContentLoaded', () => {
     window.currentLang = "English";
 
-    // --- 1. ACCESSIBILITY ANNOUNCER FOR POPUP ---
-    const popupAnnouncer = document.createElement('div');
-    popupAnnouncer.setAttribute('aria-live', 'assertive');
-    popupAnnouncer.setAttribute('aria-atomic', 'true');
-    popupAnnouncer.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;';
-    document.body.appendChild(popupAnnouncer);
+    // --- 1. ACCESSIBILITY FOR STATIC TEXT ---
+    const staticTextElements = document.querySelectorAll('.logo, .section-title, .selector-info-box, .selector-info-box p, .selector-example');
+    staticTextElements.forEach(el => el.setAttribute('tabindex', '0'));
+
+    // --- 2. FIX: MAKE DEFAULT SHORTCUT TABLE READABLE (NO "ROW" ANNOUNCEMENT) ---
+    const defaultRows = document.querySelectorAll('.default-table tbody tr');
+    defaultRows.forEach((row) => {
+        row.setAttribute('tabindex', '0');
+        row.setAttribute('role', 'listitem'); // Forces SR to treat it as a list item, not a table row!
+
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 2) {
+            const action = cells[0].textContent.trim();
+            const keys = cells[1].textContent.trim();
+            row.setAttribute('aria-label', `Default Shortcut: ${action}. Key combination: ${keys}`);
+        }
+    });
+
+    // --- 3. ACCESSIBILITY ENGINE (DUAL-TOGGLE FIX FOR INSTANT READ) ---
+    const srAnnouncer1 = document.createElement('div');
+    const srAnnouncer2 = document.createElement('div');
+    const commonStyles = 'position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;';
+
+    srAnnouncer1.id = "wkb-popup-announcer-1";
+    srAnnouncer1.setAttribute('aria-live', 'assertive');
+    srAnnouncer1.setAttribute('aria-atomic', 'true');
+    srAnnouncer1.style.cssText = commonStyles;
+
+    srAnnouncer2.id = "wkb-popup-announcer-2";
+    srAnnouncer2.setAttribute('aria-live', 'assertive');
+    srAnnouncer2.setAttribute('aria-atomic', 'true');
+    srAnnouncer2.style.cssText = commonStyles;
+
+    document.body.appendChild(srAnnouncer1);
+    document.body.appendChild(srAnnouncer2);
+
+    let announcerToggle = true;
+
+    function announceToScreenReader(message) {
+        if (announcerToggle) {
+            srAnnouncer2.textContent = ''; 
+            srAnnouncer1.textContent = message; 
+        } else {
+            srAnnouncer1.textContent = ''; 
+            srAnnouncer2.textContent = message; 
+        }
+        announcerToggle = !announcerToggle;
+    }
+
+    // === INSTANT ANNOUNCEMENT - NO TIMEOUT DELAY ===
+    announceToScreenReader("Settings window is opened");
 
     function showAccessibleAlert(msg, type = "error") {
-        popupAnnouncer.textContent = '';
-        setTimeout(() => { popupAnnouncer.textContent = msg; }, 50);
+        announceToScreenReader(msg);
 
         const existing = document.getElementById('webkeybind-popup-alert');
         if (existing) existing.remove();
@@ -43,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const alertDiv = document.createElement('div');
         alertDiv.id = 'webkeybind-popup-alert';
         alertDiv.setAttribute('aria-hidden', 'true');
-        alertDiv.innerText = msg;
+        alertDiv.textContent = msg; 
 
         let bgColor = "#007BFF";
         if (type === "error") bgColor = "#DC3545";
@@ -63,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!document.getElementById('popup-alert-styles')) {
             const style = document.createElement('style');
             style.id = 'popup-alert-styles';
-            style.innerHTML = `
+            style.textContent = `
                 @keyframes popup-fadein { from { opacity: 0; transform: translate(-50%, 10px); } to { opacity: 1; transform: translate(-50%, 0); } }
                 @keyframes modal-fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
             `;
@@ -82,8 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showAccessibleConfirm(msg, onConfirmCallback, onCancelCallback = null, customYesTxt = null, customNoTxt = null) {
         const t = window.translations?.[window.currentLang] || window.translations?.['English'] || {};
-        popupAnnouncer.textContent = '';
-        setTimeout(() => { popupAnnouncer.textContent = msg + " Press Tab to select options."; }, 50);
+        announceToScreenReader(msg + " Press Tab to select options.");
 
         const existing = document.getElementById('wkb-confirm-modal');
         if (existing) existing.remove();
@@ -107,18 +150,18 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         const text = document.createElement('p');
-        text.innerText = msg;
+        text.textContent = msg; 
         text.style.cssText = "margin: 0 0 20px 0; color: #333; font-size: 15px; line-height: 1.5; font-weight: 500; word-break: break-word;";
 
         const btnContainer = document.createElement('div');
         btnContainer.style.cssText = "display: flex; justify-content: center; gap: 12px;";
 
         const btnCancel = document.createElement('button');
-        btnCancel.innerText = customNoTxt || t.cancel || "Cancel";
+        btnCancel.textContent = customNoTxt || t.cancel || "Cancel"; 
         btnCancel.style.cssText = "padding: 8px 16px; border: 1px solid #ccc; background: #f8f9fa; border-radius: 4px; cursor: pointer; color: #333; font-weight: bold; flex: 1;";
 
         const btnYes = document.createElement('button');
-        btnYes.innerText = customYesTxt || t.yes_delete || "Yes, Delete";
+        btnYes.textContent = customYesTxt || t.yes_delete || "Yes, Delete"; 
         btnYes.style.cssText = "padding: 8px 16px; border: none; background: #DC3545; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; flex: 1;";
         
         if (customYesTxt === "Replace") btnYes.style.background = "#FF9800"; 
@@ -151,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.showAccessibleConfirm = showAccessibleConfirm; 
 
-    // --- 2. ADD SHORTCUT MODAL ---
+    // --- 4. ADD SHORTCUT MODAL ---
     function showAddShortcutModal() {
         const t = window.translations?.[window.currentLang] || window.translations?.['English'] || {};
         
@@ -179,19 +222,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const title = document.createElement('h3');
         title.id = 'add-modal-title';
-        title.innerText = t.addBtn || "Add Shortcut Manually";
+        title.textContent = t.addBtn || "Add Shortcut Manually"; 
+        title.setAttribute('tabindex', '0'); 
         title.style.cssText = "margin: 0 0 10px 0; color: #333; font-size: 18px; text-align: center;";
 
-        function createInput(placeholder, val, isReadonly, labelTxt) {
+        function createInput(placeholder, val, isReadonly, labelTxt, uniqueSuffix) {
             const wrapper = document.createElement('div');
             wrapper.style.display = "flex"; wrapper.style.flexDirection = "column"; wrapper.style.gap = "4px";
             
+            const inputId = `wkb-input-${uniqueSuffix}`;
+
             const lbl = document.createElement('label');
-            lbl.innerText = labelTxt;
+            lbl.textContent = labelTxt; 
+            lbl.setAttribute('for', inputId); 
             lbl.style.cssText = "font-size: 12px; color: #555; font-weight: bold;";
             
             const inp = document.createElement('input');
-            inp.type = "text"; inp.value = val; inp.placeholder = placeholder; inp.readOnly = isReadonly;
+            inp.id = inputId;
+            inp.type = "text"; 
+            inp.value = val; 
+            inp.placeholder = placeholder; 
+            inp.readOnly = isReadonly;
+            inp.setAttribute('aria-label', labelTxt);
+            
+            if (!isReadonly) {
+                inp.setAttribute('aria-required', 'true');
+            }
+
             inp.style.cssText = `
                 width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;
                 font-size: 14px; box-sizing: border-box; outline: none; transition: border 0.2s;
@@ -205,44 +262,59 @@ document.addEventListener('DOMContentLoaded', () => {
             return { wrapper, input: inp };
         }
 
-        const urlField = createInput(t.p_url || "URL", window.currentSiteHostname || "", true, "Site URL");
-        const nameField = createInput(t.p_name || "Name", "", false, "Action Name");
-        const idField = createInput(t.p_id || "ID/Class", "", false, "Element ID or Class");
-        const keyField = createInput(t.p_key || "Key", "", false, "Trigger Key (e.g. K)");
+        const urlField = createInput(t.p_url || "URL", window.currentSiteHostname || "", true, "Site URL", "url");
+        const nameField = createInput(t.p_name || "Name", "", false, "Action Name", "name");
+        const idField = createInput(t.p_id || "ID/Class", "", false, "Element ID or Class", "elementId");
+        const keyField = createInput(t.p_key || "Key", "", false, "Trigger Key (e.g. K)", "key");
         
         keyField.input.maxLength = 1;
         keyField.input.addEventListener('input', (e) => {
             e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+            e.target.removeAttribute('aria-invalid');
         });
+        nameField.input.addEventListener('input', (e) => e.target.removeAttribute('aria-invalid'));
+        idField.input.addEventListener('input', (e) => e.target.removeAttribute('aria-invalid'));
 
         const btnContainer = document.createElement('div');
         btnContainer.style.cssText = "display: flex; justify-content: space-between; gap: 10px; margin-top: 10px;";
 
         const btnCancel = document.createElement('button');
-        btnCancel.innerText = t.cancelBtn || "Cancel";
+        btnCancel.textContent = t.cancelBtn || "Cancel"; 
         btnCancel.style.cssText = "padding: 10px; border: 1px solid #ccc; background: #f8f9fa; border-radius: 4px; cursor: pointer; flex: 1; font-weight: bold; color: #333;";
 
         const btnSave = document.createElement('button');
-        btnSave.innerText = "Save Shortcut";
+        btnSave.textContent = "Save Shortcut"; 
         btnSave.style.cssText = "padding: 10px; border: none; background: #007BFF; color: white; border-radius: 4px; cursor: pointer; flex: 1; font-weight: bold;";
 
         const closeModal = (isCancel = false) => { 
             overlay.remove(); 
+            const addBtn = document.querySelector('.btn-add');
             if(addBtn) addBtn.focus(); 
             if(isCancel) showAccessibleAlert("Add shortcut cancelled.", "info");
         };
         btnCancel.onclick = () => closeModal(true);
 
+        const enableSaveButton = () => {
+            btnSave.disabled = false;
+            btnSave.style.opacity = '1';
+            btnSave.style.cursor = 'pointer';
+        };
+
         btnSave.onclick = () => {
+            btnSave.disabled = true;
+            btnSave.style.opacity = '0.5';
+            btnSave.style.cursor = 'not-allowed';
+
             const n = nameField.input.value.trim();
             const i = idField.input.value.trim();
             const k = keyField.input.value.trim();
 
             if (!n || !i || !k) {
                 showAccessibleAlert("All fields are required.", "error");
-                if(!n) nameField.input.style.borderColor = "#DC3545";
-                if(!i) idField.input.style.borderColor = "#DC3545";
-                if(!k) keyField.input.style.borderColor = "#DC3545";
+                if(!n) { nameField.input.style.borderColor = "#DC3545"; nameField.input.setAttribute('aria-invalid', 'true'); }
+                if(!i) { idField.input.style.borderColor = "#DC3545"; idField.input.setAttribute('aria-invalid', 'true'); }
+                if(!k) { keyField.input.style.borderColor = "#DC3545"; keyField.input.setAttribute('aria-invalid', 'true'); }
+                enableSaveButton();
                 return;
             }
 
@@ -254,6 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const errTemp = t.duplicate_error || "Key '{key}' is already saved for: {name}";
                     showAccessibleAlert(errTemp.replace("{key}", k).replace("{name}", btnName), "error");
                     keyField.input.style.borderColor = "#DC3545";
+                    keyField.input.setAttribute('aria-invalid', 'true');
+                    enableSaveButton();
                     return;
                 }
 
@@ -276,6 +350,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (chrome.runtime.lastError || !results || !results[0] || !results[0].result) {
                             showAccessibleAlert(t.invalid_id || `Element "${i}" not found on page.`, "error");
                             idField.input.style.borderColor = "#DC3545";
+                            idField.input.setAttribute('aria-invalid', 'true');
+                            enableSaveButton();
                         } else {
                             saveData(n, i, k);
                         }
@@ -285,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         function saveData(name, elementId, key) {
-            const uniqueId = Date.now().toString();
+            const uniqueId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
             const data = { id: uniqueId, url: window.currentSiteHostname, name: name, elementId: elementId, key: key, profile: { path: elementId } };
             chrome.storage.local.set({ [`shortcut_${uniqueId}`]: data }, () => {
                 closeModal();
@@ -299,7 +375,7 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.appendChild(modal);
         document.body.appendChild(overlay);
 
-        const focusables = [nameField.input, idField.input, keyField.input, btnCancel, btnSave];
+        const focusables = [title, urlField.input, nameField.input, idField.input, keyField.input, btnCancel, btnSave];
         overlay.addEventListener('keydown', (e) => {
             if (e.key === 'Tab') {
                 const first = focusables[0];
@@ -316,31 +392,83 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        setTimeout(() => { popupAnnouncer.textContent = "Add Shortcut dialog opened. Enter Name, ID, and Key."; }, 50);
+        announceToScreenReader("Add Shortcut dialog opened. Enter Name, ID, and Key. Press Escape to cancel.");
         nameField.input.focus();
     }
 
-    // --- 3. UI REFERENCES & CORE LOGIC ---
+    // --- 5. UI REFERENCES & CORE LOGIC ---
     const shortcutList = document.querySelector('.shortcut-list');
     const addBtn = document.querySelector('.btn-add');
     const showAllBtn = document.querySelector('.btn-show-all');
     const deleteAllBtn = document.querySelector('.btn-delete-all') || document.getElementById('btn-delete-all');
 
-    // --- EXACT FIX: PUT SAVE AND DELETE BUTTONS IN A WRAPPER SO THEY STICK TOGETHER ---
+    if (addBtn) {
+        addBtn.setAttribute('tabindex', '0');
+        addBtn.setAttribute('role', 'button');
+        addBtn.setAttribute('aria-label', 'Add a new shortcut manually');
+        const handleAdd = (e) => {
+            e?.preventDefault();
+            showAddShortcutModal();
+        };
+        addBtn.addEventListener('click', handleAdd);
+        addBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleAdd(e);
+        });
+    }
+
+    if (showAllBtn) {
+        showAllBtn.setAttribute('tabindex', '0');
+        showAllBtn.setAttribute('role', 'button');
+        const handleShowAll = (e) => {
+            e?.preventDefault();
+            isShowingAll = !isShowingAll;
+            window.loadShortcuts();
+            showAccessibleAlert(isShowingAll ? "Showing all shortcuts" : "Showing current site shortcuts", "info");
+        };
+        showAllBtn.addEventListener('click', handleShowAll);
+        showAllBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleShowAll(e);
+        });
+    }
+
+    if (shortcutList && shortcutList.parentNode) {
+        if (!document.getElementById('wkb-creation-tip')) {
+            const helpText = document.createElement('div');
+            helpText.id = 'wkb-creation-tip';
+            helpText.setAttribute('aria-live', 'polite');
+            helpText.setAttribute('tabindex', '0'); 
+            helpText.style.cssText = "font-size: 12.5px; color: #444; text-align: center; margin-bottom: 12px; padding: 8px; background: #f8f9fa; border-radius: 4px; border: 1px solid #ddd; font-weight: 500;";
+            helpText.textContent = "💡 Tip: Press Alt+Shift+C to enable/disable Creation Mode. Press Escape to cancel.";
+            shortcutList.parentNode.insertBefore(helpText, shortcutList);
+        }
+    }
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            let shouldReload = false;
+            for (let key in changes) {
+                if (key.startsWith('shortcut_')) shouldReload = true;
+            }
+            if (shouldReload && window.loadShortcuts) {
+                window.loadShortcuts();
+            }
+        }
+    });
+
     if (deleteAllBtn && !document.getElementById('btn-save-all')) {
         const btnWrapper = document.createElement('div');
         btnWrapper.style.cssText = "display: flex; gap: 10px; align-items: center;";
         
         const saveAllBtn = document.createElement('button');
         saveAllBtn.id = 'btn-save-all';
-        saveAllBtn.innerText = "Save Changes";
+        const t = window.translations?.[window.currentLang] || window.translations?.['English'] || {};
+        saveAllBtn.textContent = t.saveChanges || "Save Changes"; 
         saveAllBtn.style.cssText = "padding: 8px 16px; border: none; background-color: #28a745; color: white; border-radius: 4px; cursor: pointer; font-weight: bold; font-family: sans-serif; font-size: 13px;";
         
-        // Wrap them up so the parent layout doesn't split them apart!
         deleteAllBtn.parentNode.insertBefore(btnWrapper, deleteAllBtn);
         btnWrapper.appendChild(saveAllBtn);
         btnWrapper.appendChild(deleteAllBtn);
-        deleteAllBtn.style.margin = "0"; // Strip any wild margins that cause separation
+        deleteAllBtn.style.margin = "0"; 
 
         saveAllBtn.addEventListener('click', () => {
             const rows = document.querySelectorAll('.shortcut-row');
@@ -351,9 +479,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const idInp = row.querySelector('input[data-field="elementId"]');
                 const keyInp = row.querySelector('input[data-field="key"]');
 
-                if (!nameInp.value.trim()) { hasError = true; nameInp.classList.add('input-error'); }
-                if (!idInp.value.trim()) { hasError = true; idInp.classList.add('input-error'); }
-                if (!keyInp.value.trim()) { hasError = true; keyInp.classList.add('input-error'); }
+                if (!nameInp.value.trim()) { hasError = true; nameInp.classList.add('input-error'); nameInp.setAttribute('aria-invalid', 'true'); }
+                if (!idInp.value.trim()) { hasError = true; idInp.classList.add('input-error'); idInp.setAttribute('aria-invalid', 'true'); }
+                if (!keyInp.value.trim()) { hasError = true; keyInp.classList.add('input-error'); keyInp.setAttribute('aria-invalid', 'true'); }
             });
 
             if (hasError) {
@@ -377,7 +505,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (duplicate) {
                         duplicateFound = true;
-                        row.querySelector('input[data-field="key"]').classList.add('input-error');
+                        const keyInp = row.querySelector('input[data-field="key"]');
+                        keyInp.classList.add('input-error');
+                        keyInp.setAttribute('aria-invalid', 'true');
                         if (window.showAccessibleAlert) window.showAccessibleAlert(`Key '${key}' is already used by '${duplicate.name || duplicate.elementId}'.`, "error");
                     } else {
                         let existingData = items[`shortcut_${id}`] || { id, url, profile: { path: elementId } };
@@ -418,14 +548,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.loadShortcuts = function () {
-        shortcutList.innerHTML = '';
         const t = window.translations?.[window.currentLang] || window.translations?.['English'] || {};
 
         if (showAllBtn) {
-            showAllBtn.innerHTML = `${isShowingAll ? (t.showCurrent || "Show Current") : (t.showAll || "Show All")} <span class="arrow-circle">${isShowingAll ? '⌃' : '⌄'}</span>`;
+            showAllBtn.replaceChildren(); 
+            const btnText = document.createTextNode((isShowingAll ? (t.showCurrent || "Show Current") : (t.showAll || "Show All")) + " ");
+            const arrowSpan = document.createElement('span');
+            arrowSpan.className = 'arrow-circle';
+            arrowSpan.textContent = isShowingAll ? '⌃' : '⌄';
+            showAllBtn.appendChild(btnText);
+            showAllBtn.appendChild(arrowSpan);
         }
 
         chrome.storage.local.get(null, (items) => {
+            if (shortcutList) shortcutList.replaceChildren();
+
             const allShortcuts = Object.values(items).filter(item => item.id);
             const currentNorm = normalizeUrl(window.currentSiteHostname);
             const displayList = isShowingAll ? allShortcuts : allShortcuts.filter(s => {
@@ -436,10 +573,13 @@ document.addEventListener('DOMContentLoaded', () => {
             displayList.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
 
             if (displayList.length === 0) {
-                const msg = document.createElement('div');
-                msg.style.cssText = "text-align:center; padding:20px; color:#999; font-size:13px; font-style:italic;";
-                msg.innerText = `${t.no_shortcuts || "No shortcuts"} ${isShowingAll ? '' : window.currentSiteHostname}`;
-                shortcutList.appendChild(msg);
+                if (shortcutList) {
+                    const msg = document.createElement('div');
+                    msg.style.cssText = "text-align:center; padding:20px; color:#999; font-size:13px; font-style:italic;";
+                    msg.textContent = `${t.no_shortcuts || "No shortcuts"} ${isShowingAll ? '' : window.currentSiteHostname}`;
+                    msg.setAttribute('tabindex', '0'); 
+                    shortcutList.appendChild(msg);
+                }
             } else {
                 displayList.forEach((data, index) => createRow(data, index + 1));
             }
@@ -460,21 +600,64 @@ document.addEventListener('DOMContentLoaded', () => {
             row.title = "Active on this website";
         }
 
-        row.innerHTML = `
-            <span class="index">${index}</span>
-            <input type="text" value="${data.url}" class="input-field url-input" readonly title="Site: ${data.url}" 
-                style="background-color: #f1f3f4; color: #5f6368; cursor: default; border: 1px solid transparent; font-weight: 600;">
-            <input type="text" value="${data.name}" class="input-field" data-field="name" placeholder="${t.p_name || 'Name'}">
-            <input type="text" value="${data.elementId}" class="input-field" data-field="elementId" placeholder="${t.p_id || 'ID/Class'}">
-            <input type="text" value="${data.key}" class="input-field key-input" data-field="key" placeholder="${t.p_key || 'Key'}" style="text-align:center;" maxlength="1">
-            <button class="btn-remove" title="Delete">×</button>
-        `;
+        const indexSpan = document.createElement('span');
+        indexSpan.className = 'index';
+        indexSpan.textContent = index;
+        indexSpan.setAttribute('tabindex', '0'); 
+        indexSpan.setAttribute('role', 'listitem');
+        indexSpan.setAttribute('aria-label', `Shortcut ${index}`);
+
+        const urlInput = document.createElement('input');
+        urlInput.type = 'text';
+        urlInput.value = data.url;
+        urlInput.className = 'input-field url-input';
+        urlInput.readOnly = true;
+        urlInput.title = `Site: ${data.url}`;
+        urlInput.setAttribute('aria-label', `Site URL: ${data.url}`);
+        urlInput.style.cssText = "background-color: #f1f3f4; color: #5f6368; cursor: default; border: 1px solid transparent; font-weight: 600;";
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = data.name;
+        nameInput.className = 'input-field';
+        nameInput.setAttribute('data-field', 'name');
+        nameInput.setAttribute('aria-label', 'Action Name');
+        nameInput.placeholder = t.p_name || 'Name';
+
+        const idInput = document.createElement('input');
+        idInput.type = 'text';
+        idInput.value = data.elementId;
+        idInput.className = 'input-field';
+        idInput.setAttribute('data-field', 'elementId');
+        idInput.setAttribute('aria-label', 'Element ID or Class');
+        idInput.placeholder = t.p_id || 'ID/Class';
+
+        const keyInput = document.createElement('input');
+        keyInput.type = 'text';
+        keyInput.value = data.key;
+        keyInput.className = 'input-field key-input';
+        keyInput.setAttribute('data-field', 'key');
+        keyInput.setAttribute('aria-label', 'Trigger Key');
+        keyInput.placeholder = t.p_key || 'Key';
+        keyInput.style.cssText = "text-align:center;";
+        keyInput.maxLength = 1;
+
+        const btnRemove = document.createElement('button');
+        btnRemove.className = 'btn-remove';
+        btnRemove.title = 'Delete';
+        btnRemove.textContent = '×';
+        btnRemove.setAttribute('aria-label', `Delete shortcut for ${data.name || 'action'}`);
+
+        row.append(indexSpan, urlInput, nameInput, idInput, keyInput, btnRemove);
 
         row.querySelectorAll('input').forEach(input => {
-            if (input.value.trim() === "" && !input.readOnly) input.classList.add('input-error');
+            if (input.value.trim() === "" && !input.readOnly) {
+                input.classList.add('input-error');
+                input.setAttribute('aria-invalid', 'true');
+            }
 
             input.addEventListener('input', (e) => {
-                const field = e.target.dataset.field;
+                const field = e.target.dataset.field || e.target.getAttribute('data-field');
                 let value = e.target.value;
 
                 if (field === 'key') {
@@ -484,9 +667,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (value.trim() === "") {
                     e.target.classList.add('input-error');
+                    e.target.setAttribute('aria-invalid', 'true');
                     if (field === 'key') showAccessibleAlert("Key field cleared.", "info");
+                } else {
+                    e.target.classList.remove('input-error');
+                    e.target.removeAttribute('aria-invalid');
                 }
-                else e.target.classList.remove('input-error');
 
                 if (field === 'key' && value.trim() !== "") {
                     chrome.storage.local.get(null, (items) => {
@@ -497,6 +683,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             const errTemp = t.duplicate_error || "The key '{key}' is already saved for: {name}";
                             showAccessibleAlert(errTemp.replace("{key}", value).replace("{name}", btnName), "error");
                             e.target.classList.add('input-error');
+                            e.target.setAttribute('aria-invalid', 'true');
                             e.target.value = "";
                         }
                     });
@@ -504,12 +691,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        const idInput = row.querySelector('input[data-field="elementId"]');
-        if (idInput) {
-            idInput.addEventListener('change', (e) => {
+        const idInputEl = row.querySelector('input[data-field="elementId"]');
+        if (idInputEl) {
+            idInputEl.addEventListener('change', (e) => {
                 const val = e.target.value.trim();
                 if (val === "") {
                     e.target.classList.add('input-error');
+                    e.target.setAttribute('aria-invalid', 'true');
                     return;
                 }
                 chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -530,8 +718,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (chrome.runtime.lastError || !results || !results[0] || !results[0].result) {
                             showAccessibleAlert(t.invalid_id || `The Button ID / Selector "${val}" was not found on this webpage.`, "error");
                             e.target.classList.add('input-error');
+                            e.target.setAttribute('aria-invalid', 'true');
                         } else {
                             e.target.classList.remove('input-error');
+                            e.target.removeAttribute('aria-invalid');
                         }
                     });
                 });
@@ -548,24 +738,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        shortcutList.appendChild(row);
+        if (shortcutList) shortcutList.appendChild(row);
     }
-
-    if (showAllBtn) {
-        showAllBtn.addEventListener('click', () => {
-            isShowingAll = !isShowingAll;
-            window.loadShortcuts();
-            showAccessibleAlert(isShowingAll ? "Showing all shortcuts" : "Showing current site shortcuts", "info");
-        });
-    }
-
-    if (addBtn) {
-        addBtn.addEventListener('click', () => {
-            showAddShortcutModal();
-        });
-    }
-
-    document.querySelectorAll('.language-dropdown, .menu-container').forEach(el => el.removeAttribute('tabindex'));
 
     if (deleteAllBtn) {
         deleteAllBtn.addEventListener('click', () => {
@@ -586,4 +760,39 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
+
+    document.querySelectorAll('.language-dropdown, .menu-container').forEach(el => el.removeAttribute('tabindex'));
+
+    // === GLOBAL TAB LOOP ===
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            const addModal = document.getElementById('wkb-add-modal');
+            const confirmModal = document.getElementById('wkb-confirm-modal');
+            const importModalElement = document.getElementById('import-modal');
+            
+            if (addModal || confirmModal || (importModalElement && window.getComputedStyle(importModalElement).display !== 'none')) {
+                return; 
+            }
+
+            const focusables = Array.from(document.querySelectorAll('button, a[href], input, select, textarea, [tabindex="0"]'))
+                .filter(el => {
+                    const style = window.getComputedStyle(el);
+                    return !el.disabled && el.offsetWidth > 0 && el.offsetHeight > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+                });
+
+            if (focusables.length === 0) return;
+
+            const first = focusables[0];
+            const last = focusables[focusables.length - 1];
+
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    });
+
 });

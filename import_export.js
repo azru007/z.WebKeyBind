@@ -1,3 +1,6 @@
+// =======================================================
+// IMPORT & EXPORT LOGIC
+// =======================================================
 document.addEventListener('DOMContentLoaded', () => {
     const btnExportSite = document.getElementById('btn-export-site');
     const btnExportAll = document.getElementById('btn-export-all');
@@ -18,7 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return url.replace(/^(?:https?:\/\/)?(?:www\.)?/i, "").split('/')[0].toLowerCase();
     };
 
-    // --- 1. FOCUS TRAP LOGIC ---
+    const isFullTabMode = new URLSearchParams(window.location.search).get('importMode') === 'true';
+
     function handleFocusTrap(e) {
         if (e.key !== 'Tab') return;
         const focusableElements = importModal.querySelectorAll('a[href], button, textarea, input, select, [tabindex]:not([tabindex="-1"])');
@@ -34,9 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 2. MENU TOGGLE ---
+    // --- 3-BAR MENU FIX ---
+    // Because menuBurger is a <button> tag in your HTML, it natively handles Enter/Space.
+    // Adding keydown listeners causes it to fire twice. We ONLY use 'click' here.
     if (menuBurger && menuDropdown) {
-        menuBurger.addEventListener('click', (e) => {
+        const toggleMenu = (e) => {
             e.stopPropagation();
             const langMenu = document.getElementById('lang-menu');
             const langBtn = document.getElementById('lang-button');
@@ -45,35 +51,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const isVisible = menuDropdown.style.display === 'block';
             menuDropdown.style.display = isVisible ? 'none' : 'block';
+            menuBurger.setAttribute('aria-expanded', isVisible ? 'false' : 'true');
             
             if(window.showAccessibleAlert) {
                 window.showAccessibleAlert(isVisible ? "Import Export menu closed." : "Import Export menu opened.", "info");
             }
-        });
+        };
+
+        menuBurger.addEventListener('click', toggleMenu);
 
         if (menuContainer) {
             menuContainer.addEventListener('focusout', (event) => {
                 if (!menuContainer.contains(event.relatedTarget) && menuDropdown.style.display === 'block') { 
                     menuDropdown.style.display = 'none'; 
+                    menuBurger.setAttribute('aria-expanded', 'false');
                     if(window.showAccessibleAlert) window.showAccessibleAlert("Import Export menu closed.", "info");
                 }
             });
         }
     }
     
-    if (closeMenuBtn) closeMenuBtn.addEventListener('click', (e) => { 
-        e.stopPropagation(); menuDropdown.style.display = 'none'; 
-        if(window.showAccessibleAlert) window.showAccessibleAlert("Import Export menu closed.", "info");
-    });
+    if (closeMenuBtn) {
+        const closeMenu = (e) => { 
+            e.stopPropagation(); 
+            menuDropdown.style.display = 'none'; 
+            if (menuBurger) menuBurger.setAttribute('aria-expanded', 'false');
+            if(window.showAccessibleAlert) window.showAccessibleAlert("Import Export menu closed.", "info");
+        };
+
+        closeMenuBtn.addEventListener('click', closeMenu);
+    }
     
     document.addEventListener('click', () => { 
         if(menuDropdown && menuDropdown.style.display === 'block') {
             menuDropdown.style.display = 'none'; 
+            if (menuBurger) menuBurger.setAttribute('aria-expanded', 'false');
             if(window.showAccessibleAlert) window.showAccessibleAlert("Import Export menu closed.", "info");
         }
     });
 
-    // --- 3. EXPORT LOGIC ---
     function exportShortcuts(exportAll) {
         const hostname = window.currentSiteHostname || ""; 
         chrome.storage.local.get(null, (items) => {
@@ -95,27 +111,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (btnExportSite) btnExportSite.addEventListener('click', () => exportShortcuts(false));
-    if (btnExportAll) btnExportAll.addEventListener('click', () => exportShortcuts(true));
+    if (btnExportSite) {
+        btnExportSite.addEventListener('click', (e) => { e.preventDefault(); exportShortcuts(false); });
+    }
 
-    // --- 4. IMPORT LOGIC ---
+    if (btnExportAll) {
+        btnExportAll.addEventListener('click', (e) => { e.preventDefault(); exportShortcuts(true); });
+    }
+
     function openModal() {
         importModal.style.display = 'flex';
         if (menuDropdown) menuDropdown.style.display = 'none';
+        if (menuBurger) menuBurger.setAttribute('aria-expanded', 'false');
         document.addEventListener('keydown', handleFocusTrap);
         setTimeout(() => { document.getElementById('silent-start')?.focus(); }, 50);
-        if(window.showAccessibleAlert) window.showAccessibleAlert("Import menu opened. Drop or select a JSON file.", "info");
+        if(window.showAccessibleAlert) window.showAccessibleAlert("Import menu opened. Select a JSON file.", "info");
     }
 
     function closeModal() {
         if (!importModal || importModal.style.display === 'none') return;
         importModal.style.display = 'none';
         document.removeEventListener('keydown', handleFocusTrap);
-        if (btnImport) btnImport.focus(); 
-        if(window.showAccessibleAlert) window.showAccessibleAlert("Import menu closed.", "info");
+        
+        if (window.showAccessibleAlert) window.showAccessibleAlert("Import menu closed.", "info");
+        
+        if (isFullTabMode) {
+            window.close();
+        } else if (btnImport) {
+            btnImport.focus(); 
+        }
     }
 
-    if (btnImport) btnImport.addEventListener('click', openModal);
+    if (btnImport) {
+        btnImport.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (isFullTabMode) {
+                openModal();
+            } else {
+                const currentHtmlFile = window.location.pathname; 
+                chrome.tabs.create({ url: currentHtmlFile + "?importMode=true" });
+                window.close(); 
+            }
+        });
+    }
+
     if (btnCloseImport) btnCloseImport.addEventListener('click', closeModal);
     
     if (importModal) {
@@ -123,17 +162,59 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && importModal.style.display === 'flex') closeModal(); });
     }
 
-    // --- 5. DRAG & DROP HANDLING ---
+    if (isFullTabMode) {
+        document.body.appendChild(importModal);
+        
+        Array.from(document.body.children).forEach(child => {
+            if (child !== importModal && child.tagName !== 'SCRIPT') {
+                child.style.display = 'none';
+            }
+        });
+
+        importModal.style.display = 'flex';
+        importModal.style.position = 'fixed';
+        importModal.style.top = '0';
+        importModal.style.left = '0';
+        importModal.style.width = '100vw';
+        importModal.style.height = '100vh';
+        importModal.style.backgroundColor = '#f8f9fa';
+        importModal.style.zIndex = '999999';
+
+        if (btnCloseImport) btnCloseImport.style.display = 'none';
+        setTimeout(openModal, 100);
+    }
+
     if (dropZone) {
+        dropZone.setAttribute('role', 'button');
+        dropZone.setAttribute('tabindex', '0');
+        dropZone.setAttribute('aria-label', 'Upload JSON file. Press Enter to browse, or drag and drop a file here.');
+
         dropZone.addEventListener('click', () => fileInput.click());
         dropZone.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#f0ebff'; });
-        dropZone.addEventListener('dragleave', () => { dropZone.style.backgroundColor = '#f9f9f9'; });
-        dropZone.addEventListener('drop', (e) => { e.preventDefault(); dropZone.style.backgroundColor = '#f9f9f9'; if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]); });
+        
+        dropZone.addEventListener('dragover', (e) => { 
+            e.preventDefault(); 
+            dropZone.style.backgroundColor = '#f0ebff'; 
+        });
+        dropZone.addEventListener('dragleave', () => { 
+            dropZone.style.backgroundColor = ''; 
+        });
+        dropZone.addEventListener('drop', (e) => { 
+            e.preventDefault(); 
+            dropZone.style.backgroundColor = ''; 
+            if (e.dataTransfer.files.length) {
+                processFile(e.dataTransfer.files[0]); 
+            }
+        });
     }
-    if (fileInput) fileInput.addEventListener('change', (e) => { if (e.target.files.length) processFile(e.target.files[0]); fileInput.value = ''; });
+    
+    if (fileInput) {
+        fileInput.addEventListener('change', (e) => { 
+            if (e.target.files.length) processFile(e.target.files[0]); 
+            fileInput.value = ''; 
+        });
+    }
 
-    // --- NEW: 4-BUTTON ACCESSIBLE CONFLICT MODAL WITH CANCEL BEHAVIOR ---
     function showConflictResolutionModal(msg, onReplace, onReplaceAll, onSkip, onSkipAll, onCancel) {
         let popupAnnouncer = document.getElementById('wkb-conflict-announcer');
         if (!popupAnnouncer) {
@@ -154,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.createElement('div'); 
         modal.setAttribute('role', 'dialog'); 
         modal.setAttribute('aria-modal', 'true');
-        // FIX: Applied modal-fadein here
         modal.style.cssText = `position: relative; background: white; padding: 24px; border-radius: 8px; width: 380px; max-width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-align: center; font-family: sans-serif; animation: modal-fadein 0.2s ease-out; display: flex; flex-direction: column; gap: 16px;`;
 
         const closeIcon = document.createElement('button');
@@ -216,7 +296,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnReplace.focus();
     }
 
-    // --- 6. FILE PROCESSOR ---
     function processFile(file) {
         if (!file.name.endsWith('.json')) {
             if(window.showAccessibleAlert) window.showAccessibleAlert("Please use a .json file.", "error"); return;
@@ -224,81 +303,123 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const reader = new FileReader();
         reader.onload = (e) => {
+            let importedData;
             try {
-                const importedData = JSON.parse(e.target.result);
-                if (!Array.isArray(importedData)) throw new Error();
+                importedData = JSON.parse(e.target.result);
+                if (!Array.isArray(importedData)) throw new Error("Not array");
+            } catch (err) { 
+                if(window.showAccessibleAlert) window.showAccessibleAlert("Invalid JSON file format.", "error");
+                return;
+            }
 
-                chrome.storage.local.get(null, (existingItems) => {
-                    const existingShortcuts = Object.values(existingItems).filter(item => item.id && item.key);
-                    let importCount = 0, skipCount = 0, replaceCount = 0;
+            chrome.storage.local.get(null, (existingItems) => {
+                const existingShortcuts = Object.values(existingItems).filter(item => item.id && item.key);
+                let importCount = 0, skipCount = 0, replaceCount = 0;
+                let globalConflictAction = null; 
+                
+                let pendingSaves = {};
+                let keysToRemove = [];
+
+                const finalizeBatchSave = () => {
                     
-                    let globalConflictAction = null; 
-
-                    const handleCancel = () => {
-                        importModal.style.display = 'none'; 
-                        document.removeEventListener('keydown', handleFocusTrap); 
-                        if (window.showAccessibleAlert) window.showAccessibleAlert(`Import Cancelled. Added: ${importCount}, Replaced: ${replaceCount}, Skipped: ${skipCount}`, "info");
+                    const finishUp = () => {
+                        // FIX: Announce EXACTLY "Shortcuts imported"
+                        if (window.showAccessibleAlert) window.showAccessibleAlert("Shortcuts imported", "success");
                         if (window.loadShortcuts) window.loadShortcuts();
-                        if (btnImport) btnImport.focus(); 
-                    };
-
-                    const processItem = (index) => {
-                        if (index >= importedData.length) {
-                            importModal.style.display = 'none'; document.removeEventListener('keydown', handleFocusTrap); 
-                            if (window.showAccessibleAlert) window.showAccessibleAlert(`Import Complete! Added: ${importCount}, Replaced: ${replaceCount}, Skipped: ${skipCount}`, "success");
-                            if (window.loadShortcuts) window.loadShortcuts();
-                            if (btnImport) btnImport.focus(); 
-                            return;
-                        }
-
-                        const item = importedData[index];
-                        if (!item.id || !item.key || !item.url) { processItem(index + 1); return; }
-
-                        const normImpUrl = getNormUrl(item.url);
-                        const conflict = existingShortcuts.find(ex => ex.key === item.key && (getNormUrl(ex.url) === normImpUrl || ex.url === "<URL>" || item.url === "<URL>"));
-
-                        const saveItem = (isReplace) => {
-                            chrome.storage.local.set({ [`shortcut_${item.id}`]: item }, () => {
-                                if (isReplace) replaceCount++; else importCount++;
-                                processItem(index + 1);
-                            });
-                        };
-
-                        const handleReplace = () => {
-                            chrome.storage.local.remove(`shortcut_${conflict.id}`, () => {
-                                const cIndex = existingShortcuts.findIndex(e => e.id === conflict.id);
-                                if (cIndex > -1) existingShortcuts.splice(cIndex, 1);
-                                existingShortcuts.push(item); saveItem(true);
-                            });
-                        };
-
-                        const handleSkip = () => { skipCount++; processItem(index + 1); };
-
-                        if (conflict) {
-                            if (globalConflictAction === 'replace_all') {
-                                handleReplace();
-                            } else if (globalConflictAction === 'skip_all') {
-                                handleSkip();
-                            } else {
-                                const msg = `Conflict! Key '${item.key}' is already used for '${conflict.name}'. What would you like to do?`;
-                                showConflictResolutionModal(
-                                    msg,
-                                    () => { handleReplace(); },                                        
-                                    () => { globalConflictAction = 'replace_all'; handleReplace(); },  
-                                    () => { handleSkip(); },                                           
-                                    () => { globalConflictAction = 'skip_all'; handleSkip(); },
-                                    () => { handleCancel(); } 
-                                );
-                            }
-                        } else { 
-                            existingShortcuts.push(item); 
-                            saveItem(false); 
+                        
+                        if (isFullTabMode) {
+                            // FIX: Auto close window after 2 seconds
+                            setTimeout(() => { window.close(); }, 2000);
+                        } else {
+                            importModal.style.display = 'none'; 
+                            document.removeEventListener('keydown', handleFocusTrap); 
+                            if (btnImport) setTimeout(() => btnImport.focus(), 100);
                         }
                     };
-                    processItem(0); 
-                });
-            } catch (err) { if(window.showAccessibleAlert) window.showAccessibleAlert("Invalid JSON file format.", "error"); }
+
+                    if (keysToRemove.length > 0) {
+                        chrome.storage.local.remove(keysToRemove, () => {
+                            if (Object.keys(pendingSaves).length > 0) chrome.storage.local.set(pendingSaves, finishUp);
+                            else finishUp();
+                        });
+                    } else if (Object.keys(pendingSaves).length > 0) {
+                        chrome.storage.local.set(pendingSaves, finishUp);
+                    } else {
+                        finishUp();
+                    }
+                };
+
+                const handleCancel = () => {
+                    importModal.style.display = 'none'; 
+                    document.removeEventListener('keydown', handleFocusTrap); 
+                    
+                    if (window.showAccessibleAlert) window.showAccessibleAlert(`Import Cancelled.`, "info");
+                    if (window.loadShortcuts) window.loadShortcuts();
+                    
+                    if (!isFullTabMode && btnImport) {
+                        btnImport.focus(); 
+                    }
+                };
+
+                const processItem = (index) => {
+                    if (index >= importedData.length) {
+                        finalizeBatchSave();
+                        return;
+                    }
+
+                    const item = importedData[index];
+                    if (!item.id || !item.key || !item.url) { processItem(index + 1); return; }
+
+                    const normImpUrl = getNormUrl(item.url);
+                    const conflict = existingShortcuts.find(ex => ex.key === item.key && (getNormUrl(ex.url) === normImpUrl || ex.url === "<URL>" || item.url === "<URL>"));
+
+                    const handleReplace = () => {
+                        keysToRemove.push(`shortcut_${conflict.id}`);
+                        const cIndex = existingShortcuts.findIndex(e => e.id === conflict.id);
+                        if (cIndex > -1) existingShortcuts.splice(cIndex, 1);
+                        
+                        const newId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
+                        item.id = newId;
+                        
+                        existingShortcuts.push(item);
+                        pendingSaves[`shortcut_${newId}`] = item;
+                        
+                        replaceCount++;
+                        processItem(index + 1);
+                    };
+
+                    const handleSkip = () => { skipCount++; processItem(index + 1); };
+
+                    if (conflict) {
+                        if (globalConflictAction === 'replace_all') {
+                            handleReplace();
+                        } else if (globalConflictAction === 'skip_all') {
+                            handleSkip();
+                        } else {
+                            const msg = `Conflict! Key '${item.key}' is already used for '${conflict.name}'. What would you like to do?`;
+                            showConflictResolutionModal(
+                                msg,
+                                () => { handleReplace(); },                                        
+                                () => { globalConflictAction = 'replace_all'; handleReplace(); },  
+                                () => { handleSkip(); },                                           
+                                () => { globalConflictAction = 'skip_all'; handleSkip(); },
+                                () => { handleCancel(); } 
+                            );
+                        }
+                    } else { 
+                        const newId = Date.now().toString() + Math.random().toString(36).substring(2, 6);
+                        item.id = newId;
+                        existingShortcuts.push(item); 
+                        pendingSaves[`shortcut_${newId}`] = item;
+                        importCount++;
+                        processItem(index + 1); 
+                    }
+                };
+                
+                processItem(0); 
+            });
         };
+        
         reader.readAsText(file);
     }
 });

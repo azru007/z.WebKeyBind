@@ -500,3 +500,53 @@ body {
     background: #f1f5f9;
     color: #333;
 }
+
+/* =========================================
+   Selector Formatting Guide Info Box
+   ========================================= */
+
+.selector-info-box {
+    background-color: #f4f9ff;
+    border: 1px solid #d4e6f1; 
+    border-left: 4px solid #5fa8d3; 
+    padding: 16px 20px;
+    margin: 24px 0; 
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); 
+}
+
+/* Style the title with the lightbulb */
+.selector-info-box strong {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+/* Keep the paragraphs neat and readable */
+.selector-info-box p {
+    margin: 6px 0;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #4a5568;
+}
+
+.selector-info-box code {
+    background-color: #e2eef9;
+    color: #1a5699; 
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.selector-example {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #b8d4e8; 
+    font-size: 14px;
+    color: #4a5568;
+}

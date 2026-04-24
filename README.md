@@ -50,8 +50,8 @@ Instead of tabbing through dozens of elements, users can simply press a predefin
 ## 🛠 How to Use
 
 ### 1. Opening the Interface
-- **Chrome:** `Alt + Shift + S`  
-- **Firefox:** `Alt + Shift + E`
+- **Chrome:** `Alt + Shift + W`  
+- **Firefox:** `Alt + Shift + W`
 
 ---
 
@@ -97,5 +97,5 @@ z.WebKeyBind is built with accessibility at its core and follows best practices 
 - Google Chrome  
 - Mozilla Firefox
 - Microsoft edge
-- Safari  
+ 
 

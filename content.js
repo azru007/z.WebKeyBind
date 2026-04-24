@@ -9,23 +9,47 @@ let isLocked = false;
 let shortcutCache = []; 
 
 // =======================================================
-// 2. ACCESSIBILITY ENGINE
+// 2. ACCESSIBILITY ENGINE (DUAL-TOGGLE FIX)
 // =======================================================
-const srAnnouncer = document.createElement('div');
-srAnnouncer.id = "webkeybind-announcer";
-srAnnouncer.setAttribute('aria-live', 'assertive');
-srAnnouncer.setAttribute('aria-atomic', 'true');
-srAnnouncer.style.cssText = 'position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;';
-document.body.appendChild(srAnnouncer);
+const srAnnouncer1 = document.createElement('div');
+const srAnnouncer2 = document.createElement('div');
+const commonStyles = 'position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap;';
+
+srAnnouncer1.id = "wkb-announcer-1";
+srAnnouncer1.setAttribute('aria-live', 'assertive');
+srAnnouncer1.setAttribute('aria-atomic', 'true');
+srAnnouncer1.style.cssText = commonStyles;
+
+srAnnouncer2.id = "wkb-announcer-2";
+srAnnouncer2.setAttribute('aria-live', 'assertive');
+srAnnouncer2.setAttribute('aria-atomic', 'true');
+srAnnouncer2.style.cssText = commonStyles;
+
+document.body.appendChild(srAnnouncer1);
+document.body.appendChild(srAnnouncer2);
+
+let announcerToggle = true;
 
 function announceToScreenReader(message, color = "default") {
-    showNotification(message, color);
+    if (color !== "hidden") {
+        showNotification(message, color);
+    }
+
     const langMap = { "English": "en", "हिंदी": "hi", "मराठी": "mr", "മലയാളം": "ml" };
     const isoCode = langMap[window.currentLang] || "en";
-    srAnnouncer.setAttribute('lang', isoCode);
+    
+    srAnnouncer1.setAttribute('lang', isoCode);
+    srAnnouncer2.setAttribute('lang', isoCode);
 
-    srAnnouncer.textContent = '';
-    setTimeout(() => { srAnnouncer.textContent = message; }, 50);
+    // === INSTANT ANNOUNCEMENT - NO SETTIMEOUT DELAY ===
+    if (announcerToggle) {
+        srAnnouncer2.textContent = ''; 
+        srAnnouncer1.textContent = message; 
+    } else {
+        srAnnouncer1.textContent = ''; 
+        srAnnouncer2.textContent = message; 
+    }
+    announcerToggle = !announcerToggle;
 }
 
 function showNotification(msg, colorType) {
@@ -127,7 +151,8 @@ document.addEventListener('click', (e) => {
         updateHighlight(target);
         
         target.style.outline = "4px solid #FF9800"; 
-        announceToScreenReader("Button selected. Press a key to save shortcut.", "orange");
+        
+        announceToScreenReader("Element locked. Press a letter or number key to assign the shortcut, or Escape to cancel.", "orange");
     }
 }, true);
 
@@ -135,15 +160,36 @@ document.addEventListener('click', (e) => {
 window.addEventListener('keydown', (event) => {
     if (event.repeat) return; 
     const key = event.key.toUpperCase();
+
+    if (event.key === 'Escape' || event.keyCode === 27) {
+        if (currentMode !== null) {
+            event.preventDefault();
+            event.stopPropagation();
+            switchMode(currentMode); 
+            return;
+        }
+    }
+
     if (['CONTROL', 'SHIFT', 'ALT', 'TAB', 'CAPSLOCK'].includes(key)) return;
 
     if (event.altKey && event.shiftKey) {
-        // NOTE: 'S' is completely removed from here. 
-        // Chrome will now handle Alt+Shift+S natively via manifest.json
-        if (key === 'M') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('mouse'); return; }
-        if (key === 'K') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('keyboard'); return; }
-        if (key === 'C') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('creation'); return; }
-        if (key === 'A') { event.preventDefault(); event.stopImmediatePropagation(); readAllShortcuts();return; }
+        // === FIX: Mouse and Keyboard modes safely disabled ===
+        // if (key === 'M') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('mouse'); return; }
+        // if (key === 'K') { event.preventDefault(); event.stopImmediatePropagation(); switchMode('keyboard'); return; }
+        
+        // === FIX: Alerts and Voice completely removed from Alt+Shift+A ===
+        if (key === 'A') { 
+            event.preventDefault(); 
+            event.stopImmediatePropagation(); 
+            readAllShortcuts();
+            return; 
+        }
+        if (key === 'C') { 
+            event.preventDefault(); 
+            event.stopImmediatePropagation(); 
+            switchMode('creation'); 
+            return; 
+        }
     }
 
     if (isInputActive() && !event.altKey && !event.ctrlKey) return; 
@@ -157,14 +203,18 @@ window.addEventListener('keydown', (event) => {
             event.stopImmediatePropagation();
             if (isSaving) return; 
 
-            if (activeHoverElement) {
+            if (activeHoverElement && isLocked) {
                 saveShortcut(activeHoverElement, key);
+            } else if (activeHoverElement && !isLocked) {
+                announceToScreenReader("Please press Enter to select this element first.", "red");
             } else {
                 announceToScreenReader("No element selected.", "red");
             }
+        } else if (isLocked) {
+            announceToScreenReader("Invalid key. Please press a letter or number.", "red");
         }
     } else {
-        // EXECUTE SHORTCUT
+        // EXECUTE LOGIC
         if (event.altKey || (event.ctrlKey && event.shiftKey)) { 
             const match = shortcutCache.find(s => s.key === key);
             if (match) {
@@ -217,35 +267,26 @@ function switchMode(newMode) {
     isLocked = false;
     
     if (currentMode === newMode) {
-        let modeName = "Teach Mode";
-        if (currentMode === 'mouse') modeName = "Mouse Mode";
-        if (currentMode === 'keyboard') modeName = "Keyboard Mode";
-        if (currentMode === 'creation') modeName = "Creation Mode";
-
         currentMode = null;
-        document.body.removeAttribute('role');
         updateHighlight(null); 
         
-        announceToScreenReader(`${modeName} Disabled.`, "red"); 
+        announceToScreenReader("Creation Mode Canceled.", "red"); 
         document.body.style.cursor = "default";
         return;
     }
 
     currentMode = newMode;
-    document.body.setAttribute('role', 'application'); 
+    // === DELAY BUG FIX: document.body.setAttribute('role', 'application') IS COMPLETELY GONE ===
 
-    if (newMode === 'mouse') lastInteractionType = 'mouse';
+    if (newMode === 'mouse' || newMode === 'creation') lastInteractionType = 'mouse';
     if (newMode === 'keyboard') lastInteractionType = 'keyboard';
 
-    if (newMode === 'mouse' && activeHoverElement) updateHighlight(activeHoverElement);
-    if (newMode === 'keyboard') {
-        const focused = getClickableTarget(document.activeElement);
-        updateHighlight(focused); 
-    }
+    if (newMode === 'creation' && activeHoverElement) updateHighlight(activeHoverElement);
 
-    if (newMode === 'mouse') { announceToScreenReader("Mouse Mode Enabled.", "blue"); document.body.style.cursor = "crosshair"; } 
-    else if (newMode === 'keyboard') { announceToScreenReader("Keyboard Mode Enabled.", "purple"); document.body.style.cursor = "default"; }
-    else if (newMode === 'creation') { announceToScreenReader("Creation Mode Enabled.", "orange"); document.body.style.cursor = "crosshair"; }
+    if (newMode === 'creation') { 
+        announceToScreenReader("Creation Mode Enabled. Use Tab to find an element, press Enter to lock it, then press a key to save.", "orange"); 
+        document.body.style.cursor = "crosshair"; 
+    }
 }
 
 function getClickableTarget(el) {
@@ -262,18 +303,27 @@ function saveShortcut(element, key) {
     const currentHost = window.location.hostname;
     const profile = generateRobustProfile(element);
     
-    const currentName = (profile.aria || profile.text || "Element").trim();
+    const currentName = (profile.aria || profile.text || profile.tag || "Element").trim();
     const currentId = profile.id || "";
     const currentPath = profile.path || "";
 
+    let simpleId = profile.path; 
+    if (profile.id) {
+        simpleId = `#${CSS.escape(profile.id)}`;
+    } else if (profile.testId) {
+        simpleId = `[data-testid="${CSS.escape(profile.testId)}"]`;
+    } else if (element.className && typeof element.className === 'string' && element.className.trim()) {
+        const safeClasses = element.className.trim().split(/\s+/).map(c => CSS.escape(c)).join('.');
+        simpleId = `${profile.tag}.${safeClasses}`;
+    }
+
     chrome.storage.local.get(null, (items) => {
         const userLang = items.ui_language || "English";
-        const t = window.translations?.[userLang] || window.translations?.['English'] || {
-            key_already_used: "Key '{key}' is already used for '{name}'."
-        };
+        const t = window.translations?.[userLang] || window.translations?.['English'] || {};
+        const keyAlreadyUsedStr = t.key_already_used || "Key '{key}' is already used by '{name}'.";
+        
         const allItems = Object.values(items);
 
-        // --- 1. CHECK: IS THIS KEY ALREADY USED ANYWHERE ON THIS SITE? ---
         const keyConflict = allItems.find(item => 
             item.key === key && 
             (item.url === currentHost || item.url === "<URL>")
@@ -284,8 +334,9 @@ function saveShortcut(element, key) {
             const isSameButtonPath = currentPath === (keyConflict.profile?.path || "");
             if (!isSameButtonId && !isSameButtonPath) {
                 isLocked = false;
-                const existingName = keyConflict.name || "another button";
-                const msg = t.key_already_used.replace("{key}", key).replace("{name}", existingName);
+                const existingName = keyConflict.name || "another element";
+                const msg = keyAlreadyUsedStr.replace("{key}", key).replace("{name}", existingName);
+                
                 announceToScreenReader(msg, "red");
                 element.style.outline = "4px solid #DC3545"; 
                 setTimeout(() => { if(currentMode) addHighlight(element); }, 1500);
@@ -293,23 +344,25 @@ function saveShortcut(element, key) {
             }
         }
 
-        // --- 2. SAVE NEW SHORTCUT ---
         isSaving = true;
         if (keyConflict) {
              chrome.storage.local.remove(`shortcut_${keyConflict.id}`);
         }
         const uniqueId = Date.now().toString();
-        const simpleId = profile.id ? `#${profile.id}` : (profile.text || profile.path);
         const data = { id: uniqueId, url: currentHost, name: currentName, profile: profile, elementId: simpleId, key: key };
 
         chrome.storage.local.set({ [`shortcut_${uniqueId}`]: data }, () => {
             isSaving = false;
             isLocked = false;
-            announceToScreenReader(`Saved shortcut Alt ${key}`, "green");
+            announceToScreenReader(`Saved shortcut! Alt ${key} is now bound to ${currentName}`, "green");
             element.style.outline = "4px solid #00E676";
+            
             setTimeout(() => {
-                if(currentMode) addHighlight(element); 
-                else removeHighlight(element);
+                if(currentMode) {
+                    switchMode(currentMode); 
+                } else {
+                    removeHighlight(element);
+                }
             }, 1000);
         });
     });
@@ -330,18 +383,25 @@ function runCachedShortcut(match) {
             return;
         }
 
-        // --- NEW: ANNOUNCE SUCCESSFUL EXECUTION ---
-        announceToScreenReader(`Executing: ${match.name || "Shortcut"}`, "blue");
+        announceToScreenReader(`Executing shortcut: ${match.name || "Action"}`, "blue");
 
         executeShortcut(result.element);
         
         if (result.healed) {
             match.profile = generateRobustProfile(result.element);
-            match.elementId = match.profile.id ? `#${match.profile.id}` : (match.profile.text || match.profile.path);
+            
+            let safeRebuild = match.profile.path;
+            if (match.profile.id) safeRebuild = `#${CSS.escape(match.profile.id)}`;
+            else if (result.element.className && typeof result.element.className === 'string' && result.element.className.trim()) {
+                const c = result.element.className.trim().split(/\s+/).map(i => CSS.escape(i)).join('.');
+                safeRebuild = `${match.profile.tag}.${c}`;
+            }
+
+            match.elementId = safeRebuild;
             chrome.storage.local.set({ [`shortcut_${match.id}`]: match });
         }
     } else {
-        announceToScreenReader("Element not found.", "red");
+        announceToScreenReader("Element not found on page.", "red");
     }
 }
 
@@ -407,6 +467,7 @@ function generateRobustProfile(element) {
         path: generateCssPath(element)
     };
 }
+
 function findElementBySelector(selector) { try { return document.querySelector(selector); } catch { return null; } }
 
 // CSS PATH GENERATOR
@@ -443,22 +504,24 @@ function generateCssPath(el) {
 }
 
 // =======================================================
-// 9. AUDIO READER
+// 9. ARIA-ONLY SHORTCUT ANNOUNCER
 // =======================================================
 function readAllShortcuts() {
     if (!chrome?.storage?.local) return;
     const currentHost = window.location.hostname;
+    
     chrome.storage.local.get(null, (items) => {
         const siteShortcuts = Object.values(items).filter(s =>
             s.key && (currentHost.includes(s.url) || s.url === "<URL>")
         );
+
         if (siteShortcuts.length === 0) {
-            announceToScreenReader("No shortcuts saved for this page.");
+            announceToScreenReader("No shortcuts are assigned for this webpage.", "red");
         } else {
             const spokenText = siteShortcuts
                 .map(s => `Alt ${s.key} is for ${s.name}`)
                 .join(". ");
-            announceToScreenReader(`Found ${siteShortcuts.length} shortcuts. ${spokenText}`);
+            announceToScreenReader(`Found ${siteShortcuts.length} shortcuts. ${spokenText}`, "blue");
         }
     });
 }
