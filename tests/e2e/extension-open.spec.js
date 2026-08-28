@@ -92,11 +92,11 @@ test.describe("Extension popup", () => {
     await expect(table).toBeVisible({ timeout: 5000 });
 
     // Verify Add button exists
-    const addBtn = page.locator("#addBtn");
+    const addBtn = page.locator(".btn-add");
     await expect(addBtn).toBeVisible();
 
     // Verify language selector exists
-    const langSelect = page.locator("#languageSelect");
+    const langSelect = page.locator("#lang-button");
     await expect(langSelect).toBeVisible();
 
     await context.close();

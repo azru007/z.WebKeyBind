@@ -49,35 +49,29 @@ test.describe("Settings CRUD", () => {
   test("add shortcut via manual entry modal", async ({}, testInfo) => {
     const { context, page } = await openPopup(testInfo);
 
-    const addBtn = page.locator("#addBtn");
+    const addBtn = page.locator(".btn-add");
     await addBtn.click();
 
     // Wait for the manual entry fields to appear
-    await page.waitForTimeout(500);
-
-    // Fill in the URL field
-    const urlInput = page.locator("#inputUrl");
-    if (await urlInput.isVisible()) {
-      await urlInput.fill("https://test.com");
-    }
+    await page.waitForSelector("#wkb-input-name", { state: "visible" });
 
     // Fill in the name field
-    const nameInput = page.locator("#inputName");
-    if (await nameInput.isVisible()) {
-      await nameInput.fill("Test Button");
-    }
-
-    // Fill in the key field
-    const keyInput = page.locator("#inputKey");
-    if (await keyInput.isVisible()) {
-      await keyInput.fill("T");
-    }
+    const nameInput = page.locator("#wkb-input-name");
+    await nameInput.fill("Test Button");
 
     // Fill in the element ID field
-    const idInput = page.locator("#inputId");
-    if (await idInput.isVisible()) {
-      await idInput.fill("btn-test");
-    }
+    const idInput = page.locator("#wkb-input-elementId");
+    await idInput.fill("btn-test");
+
+    // Fill in the key field
+    const keyInput = page.locator("#wkb-input-key");
+    await keyInput.fill("T");
+
+    // Click Save Shortcut button
+    const saveBtn = page.getByRole("button", { name: "Save Shortcut" });
+    await saveBtn.click();
+
+    await page.waitForTimeout(500);
 
     await context.close();
   });
@@ -86,7 +80,7 @@ test.describe("Settings CRUD", () => {
   test("show all shortcuts view displays table rows", async ({}, testInfo) => {
     const { context, page } = await openPopup(testInfo);
 
-    const showAllBtn = page.locator("#showAllBtn");
+    const showAllBtn = page.locator(".btn-show-all");
     if (await showAllBtn.isVisible()) {
       await showAllBtn.click();
       await page.waitForTimeout(500);
@@ -99,8 +93,8 @@ test.describe("Settings CRUD", () => {
   test("language dropdown contains all supported languages", async ({}, testInfo) => {
     const { context, page } = await openPopup(testInfo);
 
-    const langSelect = page.locator("#languageSelect");
-    const options = langSelect.locator("option");
+    const langMenu = page.locator("#lang-menu");
+    const options = langMenu.locator(".dropdown-item");
     const count = await options.count();
     expect(count).toBeGreaterThanOrEqual(4);
 

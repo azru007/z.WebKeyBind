@@ -14,15 +14,11 @@ module.exports = defineConfig({
   projects: [
     {
       name: "chromium",
-      use: {
-        channel: "chrome"
-      }
+      use: {}
     },
     {
       name: "firefox",
-      use: {
-        channel: "firefox"
-      }
+      use: {}
     }
   ],
   webServer: {
