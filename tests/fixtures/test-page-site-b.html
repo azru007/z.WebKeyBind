@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Fixture - Site B (Different Domain)</title>
+</head>
+<body>
+    <h1>Site B - Per-Site Isolation Test</h1>
+    <button id="btn-action-b" aria-label="Site B Action">Do Site B Thing</button>
+    <div id="output-area" role="status" aria-live="polite">No actions triggered.</div>
+
+    <script>
+        document.getElementById("btn-action-b").addEventListener("click", function(e) {
+            e.preventDefault();
+            document.getElementById("output-area").textContent = "Clicked: btn-action-b";
+        });
+    </script>
+</body>
+</html>

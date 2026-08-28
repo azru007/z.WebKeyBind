@@ -1,0 +1,9 @@
+node_modules/
+coverage/
+playwright-report/
+test-results/
+playwright/.local-browsers/
+coverage-report.json
+*.zip
+.DS_Store
+Thumbs.db

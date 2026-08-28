@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Fixture - Basic Page</title>
+</head>
+<body>
+    <h1>Test Page for z.WebKeyBind E2E</h1>
+
+    <nav>
+        <a href="#home" id="nav-home" aria-label="Go Home">Home</a>
+        <a href="#about" id="nav-about">About</a>
+        <a href="#contact" data-testid="nav-contact">Contact</a>
+    </nav>
+
+    <main>
+        <button id="btn-submit" aria-label="Submit Form">Submit</button>
+        <button id="btn-cancel" class="action-btn secondary">Cancel</button>
+        <button data-testid="btn-search">Search</button>
+
+        <form>
+            <input type="text" id="input-name" placeholder="Your Name" />
+            <textarea id="input-message" placeholder="Message"></textarea>
+            <select id="select-country">
+                <option value="us">United States</option>
+                <option value="in">India</option>
+            </select>
+            <div contenteditable="true" id="editable-div">Edit me</div>
+        </form>
+
+        <div id="output-area" role="status" aria-live="polite">
+            No actions triggered.
+        </div>
+    </main>
+
+    <script>
+        // Track click events for E2E assertion
+        document.querySelectorAll("button, a").forEach(function(el) {
+            el.addEventListener("click", function(e) {
+                e.preventDefault();
+                var output = document.getElementById("output-area");
+                output.textContent = "Clicked: " + (el.id || el.textContent.trim());
+            });
+        });
+    </script>
+</body>
+</html>

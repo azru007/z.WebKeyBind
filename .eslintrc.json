@@ -1,0 +1,32 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "webextensions": true,
+    "jest": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-unused-vars": ["warn", { "args": "none" }],
+    "no-undef": "error",
+    "no-redeclare": "warn",
+    "eqeqeq": "warn"
+  },
+  "globals": {
+    "chrome": "readonly",
+    "browser": "readonly",
+    "CSS": "readonly"
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "tests/",
+    "docs/",
+    "scripts/"
+  ]
+}

@@ -543,7 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try { window.currentSiteHostname = new URL(tabs[0].url).hostname; }
                 catch (e) { window.currentSiteHostname = "local"; }
             }
-            loadShortcuts();
+            if (window.loadShortcuts) window.loadShortcuts();
         });
     });
 

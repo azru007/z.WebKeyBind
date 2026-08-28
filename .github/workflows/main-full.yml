@@ -1,0 +1,80 @@
+name: Full Integration & Delivery
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  lint-and-jest:
+    name: Code Quality & Jest Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run All Jest Tests
+        run: npm test -- --coverage
+
+      - name: Run Coverage Gate
+        run: npm run test:coverage-gate
+
+  e2e-matrix:
+    name: Full E2E Browser Matrix
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Run Playwright Tests (Chromium & Firefox)
+        run: npm run test:e2e
+
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-full-report
+          path: playwright-report/
+          retention-days: 14
+
+  package-release:
+    name: Package Extension Bundle
+    runs-on: ubuntu-latest
+    needs: [lint-and-jest, e2e-matrix]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Create Production Zip Archive
+        run: |
+          zip -r z.WebKeyBind-v1.0.2.zip manifest.json *.js *.html *.css icons/ docs/ LICENSE README.md -x "node_modules/*" "tests/*" "coverage/*" "playwright-report/*" ".git/*" ".github/*" "package*.json" "jest.config.js" "playwright.config.js"
+
+      - name: Upload Packaged Zip Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webkeybind-release-zip
+          path: z.WebKeyBind-v1.0.2.zip
+          retention-days: 30

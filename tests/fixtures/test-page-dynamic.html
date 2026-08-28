@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Fixture - Dynamic DOM</title>
+</head>
+<body>
+    <h1>Dynamic DOM Test Page</h1>
+    <div id="container">
+        <button id="dynamic-btn" aria-label="Dynamic Action">Click Me</button>
+    </div>
+    <div id="output-area" role="status" aria-live="polite">No actions triggered.</div>
+
+    <script>
+        // Replace the button DOM after 500ms to simulate SPA re-renders
+        var replaced = false;
+        document.getElementById("dynamic-btn").addEventListener("click", function(e) {
+            e.preventDefault();
+            document.getElementById("output-area").textContent = "Clicked: dynamic-btn";
+        });
+
+        window.rebuildDOM = function() {
+            if (replaced) return;
+            replaced = true;
+            var container = document.getElementById("container");
+            container.innerHTML = "";
+            var newBtn = document.createElement("button");
+            newBtn.id = "dynamic-btn";
+            newBtn.setAttribute("aria-label", "Dynamic Action");
+            newBtn.textContent = "Click Me (Rebuilt)";
+            newBtn.addEventListener("click", function(e) {
+                e.preventDefault();
+                document.getElementById("output-area").textContent = "Clicked: dynamic-btn (rebuilt)";
+            });
+            container.appendChild(newBtn);
+        };
+
+        // Auto-rebuild after 1s for automated testing
+        setTimeout(function() { window.rebuildDOM(); }, 1000);
+    </script>
+</body>
+</html>

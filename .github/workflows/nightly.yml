@@ -1,0 +1,56 @@
+name: Nightly Security & Compliance Scan
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # Run at 02:00 UTC daily
+
+jobs:
+  security-audit:
+    name: Dependency Audit & Static Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Audit Project Dependencies for Vulnerabilities
+        run: npm audit --audit-level=high
+
+      - name: Run Jest Static Security Suite
+        run: npm run test:security
+
+  regression-verification:
+    name: Full Regressions & Coverage Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Jest Unit & Integration
+        run: npm test -- --coverage
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium firefox
+
+      - name: Run E2E Test Suite
+        run: npm run test:e2e
+
+      - name: Execute Requirements Verification
+        run: npm run test:coverage-gate
