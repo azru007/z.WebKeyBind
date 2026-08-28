@@ -50,7 +50,7 @@ jobs:
         run: npx playwright install --with-deps chromium firefox
 
       - name: Run E2E Test Suite
-        run: npm run test:e2e
+        run: xvfb-run npm run test:e2e
 
       - name: Execute Requirements Verification
         run: npm run test:coverage-gate
