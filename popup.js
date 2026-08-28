@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.currentLang = "English";
 
     // --- 1. ACCESSIBILITY FOR STATIC TEXT ---
-    const staticTextElements = document.querySelectorAll('.logo, .section-title, .selector-info-box, .selector-info-box p, .selector-example');
+    const staticTextElements = document.querySelectorAll('.logo, .section-title, .how-to-use-box, .how-to-use-box strong, .how-to-use-list li, .selector-info-box, .selector-info-box p, .selector-example');
     staticTextElements.forEach(el => el.setAttribute('tabindex', '0'));
 
     // --- 2. FIX: MAKE DEFAULT SHORTCUT TABLE READABLE (NO "ROW" ANNOUNCEMENT) ---

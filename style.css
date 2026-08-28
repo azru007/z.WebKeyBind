@@ -550,3 +550,65 @@ body {
     font-size: 14px;
     color: #4a5568;
 }
+
+/* =========================================
+   How to Use Guide Box
+   ========================================= */
+
+.how-to-use-box {
+    background-color: #f6faf7;
+    border: 1px solid #cbe5d5;
+    border-left: 4px solid #097956;
+    padding: 16px 20px;
+    margin: 18px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.how-to-use-box strong {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    margin-bottom: 10px;
+    color: #1e3a34;
+}
+
+.how-to-use-list {
+    margin: 0;
+    padding-left: 20px;
+    list-style-type: decimal;
+}
+
+.how-to-use-list li {
+    margin: 8px 0;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #334155;
+    outline: none;
+}
+
+.how-to-use-list li:focus {
+    outline: 2px solid #097956;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.how-to-use-list li strong {
+    display: inline;
+    font-size: 13.5px;
+    color: #0f172a;
+    margin-right: 4px;
+}
+
+.how-to-use-box code,
+.how-to-use-box kbd {
+    background-color: #e6f4ed;
+    color: #097956;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    border: 1px solid #bfe3d0;
+}

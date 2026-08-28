@@ -607,6 +607,15 @@ window.translations = {
         headerAction: "Action",
         headerShortcut: "Shortcut",
         saveChanges: "Save Changes",
+        howToUseTitle: "How to Use:",
+        howToUse1_title: "Open Settings:",
+        howToUse1_desc: "Press Alt + Shift + Z to open or close the settings window.",
+        howToUse2_title: "Create a Shortcut:",
+        howToUse2_desc: "Press Alt + Shift + C to enable Creation Mode. Use Tab or mouse hover to select an element, then press any key (A–Z, 0–9) to save. Press Escape or Alt + Shift + C to exit.",
+        howToUse3_title: "Trigger Shortcut:",
+        howToUse3_desc: "Press Alt + [Your Key] on the webpage to execute the action.",
+        howToUse4_title: "Audio Guide:",
+        howToUse4_desc: "Press Alt + Shift + A to read aloud all saved shortcuts on the website.",
     },
     हिंदी: {
         settingsTitle: "z.WebKeyBind सेटिंग्स",
@@ -653,6 +662,15 @@ window.translations = {
         headerAction: "क्रिया",
         headerShortcut: "शॉर्टकट",
         saveChanges: "परिवर्तन सहेजें",
+        howToUseTitle: "उपयोग कैसे करें:",
+        howToUse1_title: "सेटिंग्स खोलें:",
+        howToUse1_desc: "सेटिंग्स विंडो खोलने या बंद करने के लिए Alt + Shift + Z दबाएं।",
+        howToUse2_title: "शॉर्टकट बनाएं:",
+        howToUse2_desc: "क्रिएशन मोड चालू करने के लिए Alt + Shift + C दबाएं। किसी बटन पर जाने के लिए Tab या माउस का उपयोग करें, फिर सहेजने के लिए कोई भी कुंजी (A–Z, 0–9) दबाएं। बाहर निकलने के लिए Escape या Alt + Shift + C दबाएं।",
+        howToUse3_title: "शॉर्टकट चलाएं:",
+        howToUse3_desc: "संबंधित क्रिया को निष्पादित करने के लिए वेबपेज पर Alt + [आपकी कुंजी] दबाएं।",
+        howToUse4_title: "ऑडियो गाइड:",
+        howToUse4_desc: "वर्तमान वेबसाइट के सभी सहेजे गए शॉर्टकट सुनने के लिए Alt + Shift + A दबाएं।",
     },
     मराठी: {
         settingsTitle: "z.WebKeyBind सेटिंग्स",
@@ -699,6 +717,15 @@ window.translations = {
         headerAction: "क्रिया",
         headerShortcut: "शॉर्टकट",
         saveChanges: "बदल करा",
+        howToUseTitle: "कसे वापरावे:",
+        howToUse1_title: "सेटिंग्ज उघडा:",
+        howToUse1_desc: "सेटिंग्ज विंडो उघडण्यासाठी किंवा बंद करण्यासाठी Alt + Shift + Z दाबा.",
+        howToUse2_title: "शॉर्टकट तयार करा:",
+        howToUse2_desc: "क्रिएशन मोड सक्षम करण्यासाठी Alt + Shift + C दाबा. घटक निवडण्यासाठी Tab किंवा माउस वापरा, नंतर जतन करण्यासाठी कोणतीही कळ (A–Z, 0–9) दाबा. बाहेर पडण्यासाठी Escape किंवा Alt + Shift + C दाबा.",
+        howToUse3_title: "शॉर्टकट चालवा:",
+        howToUse3_desc: "वेबपेजवर क्रिया कार्यान्वित करण्यासाठी Alt + [तुमची की] दाबा.",
+        howToUse4_title: "ऑडिओ मार्गदर्शक:",
+        howToUse4_desc: "वर्तमान वेबसाइटवरील सर्व सेव्ह केलेले शॉर्टकट ऐकण्यासाठी Alt + Shift + A दाबा.",
     },
     മലയാളം: {
         settingsTitle: "z.WebKeyBind ക്രമീകരണങ്ങൾ",
@@ -745,6 +772,15 @@ window.translations = {
         headerAction: "പ്രവർത്തനം",
         headerShortcut: "കുറുക്കുവഴി",
         saveChanges: "മാറ്റങ്ങൾ സംരക്ഷിക്കുക",
+        howToUseTitle: "എങ്ങനെ ഉപയോഗിക്കാം:",
+        howToUse1_title: "ക്രമീകരണങ്ങൾ തുറക്കുക:",
+        howToUse1_desc: "ക്രമീകരണ ജാലകം തുറക്കാൻ അല്ലെങ്കിൽ അടയ്ക്കാൻ Alt + Shift + Z അമർത്തുക.",
+        howToUse2_title: "കുറുക്കുവഴി സൃഷ്ടിക്കുക:",
+        howToUse2_desc: "ക്രിയേഷൻ മോഡ് ഓണാക്കാൻ Alt + Shift + C അമർത്തുക. ഒരു എലമെന്റ് തിരഞ്ഞെടുക്കാൻ Tab അല്ലെങ്കിൽ മൗസ് ഉപയോഗിക്കുക, തുടർന്ന് സംരക്ഷിക്കാൻ ഏതെങ്കിലും കീ (A–Z, 0–9) അമർത്തുക. പുറത്തുകടക്കാൻ Escape അല്ലെങ്കിൽ Alt + Shift + C അമർത്തുക.",
+        howToUse3_title: "കുറുക്കുവഴി പ്രവർത്തിപ്പിക്കുക:",
+        howToUse3_desc: "പ്രവർത്തനം നടപ്പിലാക്കാൻ വെബ്പേജിൽ Alt + [നിങ്ങളുടെ കീ] അമർത്തുക.",
+        howToUse4_title: "ഓഡിയോ ഗൈഡ്:",
+        howToUse4_desc: "ഈ വെബ്‌സൈറ്റിലെ എല്ലാ കുറുക്കുവഴികളും കേൾക്കാൻ Alt + Shift + A അമർത്തുക.",
     }
 };
 
@@ -839,6 +875,27 @@ window.updateLanguageUI = function (lang) {
 
     if (headerAction) headerAction.textContent = t.headerAction; // FIX: innerText -> textContent
     if (headerShortcut) headerShortcut.textContent = t.headerShortcut; // FIX: innerText -> textContent
+
+    // --- HOW TO USE GUIDE ---
+    const howToUseTitle = document.getElementById('howToUseTitle');
+    const howToUse1_title = document.getElementById('howToUse1_title');
+    const howToUse1_desc = document.getElementById('howToUse1_desc');
+    const howToUse2_title = document.getElementById('howToUse2_title');
+    const howToUse2_desc = document.getElementById('howToUse2_desc');
+    const howToUse3_title = document.getElementById('howToUse3_title');
+    const howToUse3_desc = document.getElementById('howToUse3_desc');
+    const howToUse4_title = document.getElementById('howToUse4_title');
+    const howToUse4_desc = document.getElementById('howToUse4_desc');
+
+    if (howToUseTitle && t.howToUseTitle) howToUseTitle.textContent = t.howToUseTitle;
+    if (howToUse1_title && t.howToUse1_title) howToUse1_title.textContent = t.howToUse1_title;
+    if (howToUse1_desc && t.howToUse1_desc) howToUse1_desc.textContent = ' ' + t.howToUse1_desc;
+    if (howToUse2_title && t.howToUse2_title) howToUse2_title.textContent = t.howToUse2_title;
+    if (howToUse2_desc && t.howToUse2_desc) howToUse2_desc.textContent = ' ' + t.howToUse2_desc;
+    if (howToUse3_title && t.howToUse3_title) howToUse3_title.textContent = t.howToUse3_title;
+    if (howToUse3_desc && t.howToUse3_desc) howToUse3_desc.textContent = ' ' + t.howToUse3_desc;
+    if (howToUse4_title && t.howToUse4_title) howToUse4_title.textContent = t.howToUse4_title;
+    if (howToUse4_desc && t.howToUse4_desc) howToUse4_desc.textContent = ' ' + t.howToUse4_desc;
     
     // --- UPDATED GUIDE BOX ---
     const guideTitle = document.getElementById('guideTitle');
