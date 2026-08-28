@@ -51,3 +51,5 @@ Please consult the following detail pages for working with the test suites:
 5. [Manual-Only Requirements](manual-only-requirements.md) — Boundary conditions and accessibility features requiring human verification.
 6. [Security Guidelines](security.md) — Security boundaries, CSP limitations, and static analysis details.
 7. [Gap Scan Findings](gap-scan-findings.md) — Codebase analysis findings, duplication resolutions, and code quality notes.
+
+<!-- CI Trigger: 2026-08-28 -->
