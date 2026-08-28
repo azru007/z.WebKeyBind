@@ -28,12 +28,17 @@ test.describe("Extension popup", () => {
       ]
     });
 
-    // Get service worker to find extension ID
-    let sw;
-    if (context.serviceWorkers().length > 0) {
-      sw = context.serviceWorkers()[0];
-    } else {
-      sw = await context.waitForEvent("serviceworker");
+    // Poll service workers to avoid race conditions in slow CI environments
+    let sw = context.serviceWorkers()[0];
+    if (!sw) {
+      for (let i = 0; i < 50; i++) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        sw = context.serviceWorkers()[0];
+        if (sw) break;
+      }
+    }
+    if (!sw) {
+      throw new Error("Service worker did not load.");
     }
     const extensionId = sw.url().split("/")[2];
 
@@ -64,11 +69,17 @@ test.describe("Extension popup", () => {
       ]
     });
 
-    let sw;
-    if (context.serviceWorkers().length > 0) {
-      sw = context.serviceWorkers()[0];
-    } else {
-      sw = await context.waitForEvent("serviceworker");
+    // Poll service workers to avoid race conditions in slow CI environments
+    let sw = context.serviceWorkers()[0];
+    if (!sw) {
+      for (let i = 0; i < 50; i++) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        sw = context.serviceWorkers()[0];
+        if (sw) break;
+      }
+    }
+    if (!sw) {
+      throw new Error("Service worker did not load.");
     }
     const extensionId = sw.url().split("/")[2];
 
